@@ -8,6 +8,8 @@ import (
 	"os/user"
 	"path"
 	"time"
+
+	"github.com/eiladin/tldr/zip"
 )
 
 const (
@@ -75,7 +77,7 @@ func (cache *Cache) LoadFromRemote() error {
 	return nil
 }
 
-func GetCacheDir() (string, err) {
+func GetCacheDir() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", fmt.Errorf("ERROR: getting current user: %s", err)
