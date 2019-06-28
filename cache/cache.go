@@ -71,12 +71,11 @@ func (cache *Cache) LoadFromRemote() error {
 	}
 
 	//TODO: Unzip tldr.zip
-	Unzip(dir.Name+"/tldr.zip", dir)
-
+	Unzip(cache.location+zipPath, cache.location)
 	return nil
 }
 
-func GetCacheDir() (string, error) {
+func GetCacheDir() (string, err) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", fmt.Errorf("ERROR: getting current user: %s", err)
