@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/user"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/eiladin/tldr/zip"
@@ -86,6 +89,27 @@ func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, error) {
 	}
 
 	return os.Open(filePath)
+}
+
+func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
+	cmn := path.Join(cache.location, pagesDirectory, "common")
+	plt := path.Join(cache.location, pagesDirectory, platform)
+	paths := []string{cmn, plt}
+	srcs := make([]string, 0)
+	for _, p := range paths {
+		files, err := ioutil.ReadDir(p)
+		if err != nil {
+			break
+		}
+		for _, f := range files {
+			if strings.HasSuffix(f.Name(), pageSuffix) {
+				srcs = append(srcs, path.Join(p, f.Name()))
+			}
+		}
+	}
+	rand.Seed(time.Now().UTC().UnixNano())
+	page := srcs[rand.Intn(len(srcs))]
+	return os.Open(page)
 }
 
 func (cache *Cache) CreateCacheFolder() error {

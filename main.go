@@ -32,14 +32,26 @@ func main() {
 		log.Fatalf("ERROR: creating cache: %s", err)
 	}
 	osName := config.OSName()
+	if *platform != "" {
+		osName = *platform
+	}
 
 	if *update {
 		fmt.Println("Refreshing Cache")
 		cache.Refresh()
-	} else {
-		if *platform != "" {
-			osName = *platform
+	} else if *random {
+		markdown, err := cache.FetchRandom(osName)
+		if err != nil {
+			fmt.Println(err)
 		}
+		if markdown != nil {
+			defer markdown.Close()
+		}
+		err = renderer.Write(markdown, os.Stdout)
+		if err != nil {
+			log.Fatalf("ERROR: rendering markdown: %s", err)
+		}
+	} else {
 		page := ""
 		for i, l := range *pages {
 			if len(*pages)-1 == i {
