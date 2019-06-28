@@ -25,12 +25,17 @@ var (
 )
 
 func main() {
+	kingpin.HelpFlag.Short('h')
 	kingpin.UsageTemplate(kingpin.CompactUsageTemplate).Version("1.0").Author("Sami Khan")
-	kingpin.Parse()
+	kingpin.CommandLine.Help = "Everyday help for everyday commands"
+
 	cache, err := cache.Create(remoteURL, ttl)
 	if err != nil {
 		log.Fatalf("ERROR: creating cache: %s", err)
 	}
+
+	kingpin.Parse()
+
 	osName := config.OSName()
 	if *platform != "" {
 		osName = *platform
@@ -60,6 +65,10 @@ func main() {
 			} else {
 				page = page + l + "-"
 			}
+		}
+		if page == "" {
+			kingpin.Fatalf("required argument 'command' not provided, try --help")
+			return
 		}
 		markdown, err := cache.Fetch(osName, page)
 		if err != nil {

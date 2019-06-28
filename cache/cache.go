@@ -22,14 +22,16 @@ const (
 	pageSuffix     = ".md"
 )
 
+// Cache stuct
 type Cache struct {
 	location string
 	remote   string
 	ttl      time.Duration
 }
 
+// Create a new Cache and populate it
 func Create(remote string, ttl time.Duration) (*Cache, error) {
-	dir, err := GetCacheDir()
+	dir, err := getCacheDir()
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
 	}
@@ -38,7 +40,7 @@ func Create(remote string, ttl time.Duration) (*Cache, error) {
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		err = cache.CreateAndLoad()
+		err = cache.createAndLoad()
 		if err != nil {
 			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
 		}
@@ -52,30 +54,20 @@ func Create(remote string, ttl time.Duration) (*Cache, error) {
 	return cache, nil
 }
 
-func (cache *Cache) CreateAndLoad() error {
-	err := cache.CreateCacheFolder()
-	if err != nil {
-		return fmt.Errorf("ERROR: creating cache directory: %s", err)
-	}
-	err = cache.LoadFromRemote()
-	if err != nil {
-		return fmt.Errorf("ERROR: loading data from remote: %s", err)
-	}
-	return nil
-}
-
+// Refresh the cache with the latest info
 func (cache *Cache) Refresh() error {
 	err := os.RemoveAll(cache.location)
 	if err != nil {
 		return fmt.Errorf("ERROR: removing cache directory: %s", err)
 	}
-	err = cache.CreateAndLoad()
+	err = cache.createAndLoad()
 	if err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
 	}
 	return nil
 }
 
+// Fetch a specific page from cache
 func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, error) {
 	filePath := path.Join(cache.location, pagesDirectory, platform, page+pageSuffix)
 	_, err := os.Stat(filePath)
@@ -91,6 +83,7 @@ func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, error) {
 	return os.Open(filePath)
 }
 
+// FetchRandom returns a random page from cache
 func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
 	cmn := path.Join(cache.location, pagesDirectory, "common")
 	plt := path.Join(cache.location, pagesDirectory, platform)
@@ -112,11 +105,23 @@ func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
 	return os.Open(page)
 }
 
-func (cache *Cache) CreateCacheFolder() error {
+func (cache *Cache) createAndLoad() error {
+	err := cache.createCacheFolder()
+	if err != nil {
+		return fmt.Errorf("ERROR: creating cache directory: %s", err)
+	}
+	err = cache.loadFromRemote()
+	if err != nil {
+		return fmt.Errorf("ERROR: loading data from remote: %s", err)
+	}
+	return nil
+}
+
+func (cache *Cache) createCacheFolder() error {
 	return os.MkdirAll(cache.location, 0755)
 }
 
-func (cache *Cache) LoadFromRemote() error {
+func (cache *Cache) loadFromRemote() error {
 	dir, err := os.Create(cache.location + zipPath)
 	if err != nil {
 		return fmt.Errorf("ERROR: creating cache: %s", err)
@@ -146,7 +151,7 @@ func (cache *Cache) LoadFromRemote() error {
 	return nil
 }
 
-func GetCacheDir() (string, error) {
+func getCacheDir() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", fmt.Errorf("ERROR: getting current user: %s", err)
