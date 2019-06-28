@@ -2,15 +2,20 @@ package renderer
 
 import (
 	"bufio"
+	"fmt"
 	"io"
+	"regexp"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
-const (
-	BLUE  = "\x1b[34;1m"
-	GREEN = "\x1b[32;1m"
-	RED   = "\x1b[31;1m"
-	RESET = "\x1b[30;1m"
+var (
+	bold  = color.New(color.Bold)
+	blue  = color.New(color.FgHiBlue)
+	red   = color.New(color.FgRed)
+	cyan  = color.New(color.FgCyan)
+	white = color.New(color.FgWhite)
 )
 
 func Render(markdown io.Reader) (string, error) {
@@ -23,20 +28,26 @@ func Render(markdown io.Reader) (string, error) {
 			scanner.Scan()
 			line = scanner.Text()
 
-			line = strings.Replace(line, "{{", BLUE, -1)
-			line = strings.Replace(line, "}}", RED, -1)
-			rendered += "\t" + RED + strings.Trim(line, "`") + RESET + "\n"
+			re := regexp.MustCompile(`\{\{.*\}\}`)
+			fmt.Printf("Pattern: %s", re.String())
+			fmt.Println("Matched: ", re.MatchString(line))
+
+			// line = strings.Replace(line, "{{"+arg+"}}", )
+
+			// line = strings.Replace(line, "{{", BLUE, -1)
+			// line = strings.Replace(line, "}}", RED, -1)
+			// rendered += "\t" + RED + strings.Trim(line, "`") + RESET + "\n"
 
 			renderingExample = false
 		} else if strings.HasPrefix(line, "#") {
 			// Heading
-			rendered += line[2:] + "\n"
+			rendered += bold.Sprint(line[2:]) + "\n"
 		} else if strings.HasPrefix(line, ">") {
 			// Quote
 			rendered += line[2:] + "\n"
 		} else if strings.HasPrefix(line, "-") {
 			// Example
-			rendered += GREEN + line + RESET + "\n"
+			rendered += blue.Sprintln(line)
 			renderingExample = true
 		} else {
 			rendered += line + "\n"

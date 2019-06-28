@@ -36,6 +36,8 @@ func main() {
 		osName = *platform
 	}
 
+	*random = true
+
 	if *update {
 		fmt.Println("Refreshing Cache")
 		cache.Refresh()
