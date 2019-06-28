@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,7 +14,9 @@ import (
 )
 
 const (
-	zipPath = "/tldr.zip"
+	zipPath        = "/tldr.zip"
+	pagesDirectory = "pages"
+	pageSuffix     = ".md"
 )
 
 type Cache struct {
@@ -32,22 +35,57 @@ func Create(remote string, ttl time.Duration) (*Cache, error) {
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		err = cache.CreateCacheFolder()
+		err = cache.CreateAndLoad()
 		if err != nil {
-			return nil, fmt.Errorf("ERROR: creating cache directory: %s", err)
-		}
-		err = cache.LoadFromRemote()
-		if err != nil {
-			return nil, fmt.Errorf("ERROR: loading data from remote: %s", err)
+			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
 		}
 	} else if err != nil || info.ModTime().Before(time.Now().Add(-ttl)) {
-		// err = cache.Reload()
-		// if err != nil {
-		// 	return nil, fmt.Errorf("ERROR: reloading cache: %s", err)
-		// }
+		err = cache.Refresh()
+		if err != nil {
+			return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
+		}
 	}
 
 	return cache, nil
+}
+
+func (cache *Cache) CreateAndLoad() error {
+	err := cache.CreateCacheFolder()
+	if err != nil {
+		return fmt.Errorf("ERROR: creating cache directory: %s", err)
+	}
+	err = cache.LoadFromRemote()
+	if err != nil {
+		return fmt.Errorf("ERROR: loading data from remote: %s", err)
+	}
+	return nil
+}
+
+func (cache *Cache) Refresh() error {
+	err := os.RemoveAll(cache.location)
+	if err != nil {
+		return fmt.Errorf("ERROR: removing cache directory: %s", err)
+	}
+	err = cache.CreateAndLoad()
+	if err != nil {
+		return fmt.Errorf("ERROR: creating cache directory: %s", err)
+	}
+	return nil
+}
+
+func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, error) {
+	filePath := path.Join(cache.location, pagesDirectory, platform, page+pageSuffix)
+	_, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		filePath = path.Join(cache.location, pagesDirectory, "common", page+pageSuffix)
+		_, err = os.Stat(filePath)
+		if os.IsNotExist(err) {
+			return nil, errors.New("This page (" + page + ") doesn't exist yet!\n" +
+				"Submit new pages here: https://github.com/tldr-pages/tldr")
+		}
+	}
+
+	return os.Open(filePath)
 }
 
 func (cache *Cache) CreateCacheFolder() error {
@@ -63,17 +101,24 @@ func (cache *Cache) LoadFromRemote() error {
 
 	resp, err := http.Get(cache.remote)
 	if err != nil {
-		return fmt.Errorf("ERROR: downloading tldr.zip: %s", err)
+		return fmt.Errorf("ERROR: downloading zip: %s", err)
 	}
 	defer resp.Body.Close()
 
 	_, err = io.Copy(dir, resp.Body)
 	if err != nil {
-		return fmt.Errorf("ERROR: saving tldr.zip to cache: %s", err)
+		return fmt.Errorf("ERROR: saving zip to cache: %s", err)
 	}
 
-	//TODO: Unzip tldr.zip
-	zip.Extract(cache.location+zipPath, cache.location)
+	_, err = zip.Extract(cache.location+zipPath, cache.location)
+	if err != nil {
+		return fmt.Errorf("ERROR: extracting zip: %s", err)
+	}
+
+	err = os.Remove(cache.location + zipPath)
+	if err != nil {
+		return fmt.Errorf("ERROR: removing zip file: %s", err)
+	}
 	return nil
 }
 

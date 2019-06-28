@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/eiladin/tldr/cache"
+	"github.com/eiladin/tldr/config"
+	"github.com/eiladin/tldr/renderer"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -14,14 +18,48 @@ const (
 )
 
 var (
-	clear  = kingpin.Flag("clear-cache", fmt.Sprintf("Clear local cache then update from %s", remoteURL)).Short('c').Bool()
-	update = kingpin.Flag("update", fmt.Sprintf("Clear local cache then update from %s", remoteURL)).Short('u').Bool()
-	random = kingpin.Flag("raundom", "Random page for testing purposes").Short('r').Default("false").Bool()
-	page   = kingpin.Arg("command", "Name of the command. (e.g. tldr tar)").Strings()
+	update   = kingpin.Flag("update", fmt.Sprintf("Clear local cache then update from %s", remoteURL)).Short('u').Bool()
+	platform = kingpin.Flag("platform", "Platform to show usage for (linux, osx, sunos, common)").Short('p').String()
+	random   = kingpin.Flag("random", "Random page for testing purposes").Short('r').Default("false").Bool()
+	pages    = kingpin.Arg("command", "Name of the command. (e.g. tldr tar)").Strings()
 )
 
 func main() {
 	kingpin.UsageTemplate(kingpin.CompactUsageTemplate).Version("1.0").Author("Sami Khan")
 	kingpin.Parse()
-	cache.Create(remoteURL, ttl)
+	cache, err := cache.Create(remoteURL, ttl)
+	if err != nil {
+		log.Fatalf("ERROR: creating cache: %s", err)
+	}
+	osName := config.OSName()
+
+	if *update {
+		fmt.Println("Refreshing Cache")
+		cache.Refresh()
+	} else {
+		if *platform != "" {
+			osName = *platform
+		}
+		page := ""
+		for i, l := range *pages {
+			if len(*pages)-1 == i {
+				page = page + l
+				break
+			} else {
+				page = page + l + "-"
+			}
+		}
+		markdown, err := cache.Fetch(osName, page)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		if markdown != nil {
+			defer markdown.Close()
+		}
+		err = renderer.Write(markdown, os.Stdout)
+		if err != nil {
+			log.Fatalf("ERROR: rendering markdown: %s", err)
+		}
+	}
 }
