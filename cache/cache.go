@@ -71,7 +71,7 @@ func (cache *Cache) LoadFromRemote() error {
 	}
 
 	//TODO: Unzip tldr.zip
-	Unzip(cache.location+zipPath, cache.location)
+	zip.Extract(cache.location+zipPath, cache.location)
 	return nil
 }
 

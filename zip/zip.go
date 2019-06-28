@@ -1,4 +1,4 @@
-package unzip
+package zip
 
 import (
 	"archive/zip"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func Unzip(src string, dest string) ([]string, error) {
+func Extract(src string, dest string) ([]string, error) {
 
 	var filenames []string
 
