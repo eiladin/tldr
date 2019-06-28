@@ -2,7 +2,6 @@ package renderer
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -11,11 +10,12 @@ import (
 )
 
 var (
-	bold  = color.New(color.Bold)
-	blue  = color.New(color.FgHiBlue)
-	red   = color.New(color.FgRed)
-	cyan  = color.New(color.FgCyan)
-	white = color.New(color.FgWhite)
+	bold   = color.New(color.Bold)
+	blue   = color.New(color.FgHiBlue)
+	red    = color.New(color.FgRed)
+	cyan   = color.New(color.FgCyan)
+	white  = color.New(color.FgWhite)
+	yellow = color.New(color.FgYellow)
 )
 
 func Render(markdown io.Reader) (string, error) {
@@ -28,9 +28,15 @@ func Render(markdown io.Reader) (string, error) {
 			scanner.Scan()
 			line = scanner.Text()
 
-			re := regexp.MustCompile(`\{\{.*\}\}`)
-			fmt.Printf("Pattern: %s", re.String())
-			fmt.Println("Matched: ", re.MatchString(line))
+			re := regexp.MustCompile(`\{\{(.*?)\}\}`)
+			keys := re.FindAllString(line, -1)
+			for _, ele := range keys {
+				repl := strings.Trim(ele, "{{")
+				repl = strings.Trim(repl, "}}")
+				line = strings.Replace(line, ele, cyan.Sprint(repl), -1)
+			}
+
+			rendered += white.Sprint(strings.Trim(line, "`")) + "\n"
 
 			// line = strings.Replace(line, "{{"+arg+"}}", )
 
@@ -40,11 +46,9 @@ func Render(markdown io.Reader) (string, error) {
 
 			renderingExample = false
 		} else if strings.HasPrefix(line, "#") {
-			// Heading
 			rendered += bold.Sprint(line[2:]) + "\n"
 		} else if strings.HasPrefix(line, ">") {
-			// Quote
-			rendered += line[2:] + "\n"
+			rendered += yellow.Sprint(line[2:]) + "\n"
 		} else if strings.HasPrefix(line, "-") {
 			// Example
 			rendered += blue.Sprintln(line)

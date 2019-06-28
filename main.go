@@ -36,8 +36,6 @@ func main() {
 		osName = *platform
 	}
 
-	*random = true
-
 	if *update {
 		fmt.Println("Refreshing Cache")
 		cache.Refresh()
@@ -56,7 +54,7 @@ func main() {
 	} else {
 		page := ""
 		for i, l := range *pages {
-			if len(*pages)-1 == i {
+			if i == len(*pages)-1 {
 				page = page + l
 				break
 			} else {
