@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/eiladin/tldr/cache"
-
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
