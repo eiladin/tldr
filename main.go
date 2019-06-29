@@ -26,7 +26,7 @@ var (
 
 func main() {
 	kingpin.HelpFlag.Short('h')
-	kingpin.UsageTemplate(kingpin.CompactUsageTemplate).Version("1.0").Author("Sami Khan")
+	kingpin.UsageTemplate(kingpin.CompactUsageTemplate).Version("1.0.1").Author("Sami Khan")
 	kingpin.CommandLine.Help = "Everyday help for everyday commands"
 
 	cache, err := cache.Create(remoteURL, ttl)
