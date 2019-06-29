@@ -8,7 +8,7 @@ import (
 
 	"github.com/eiladin/tldr/cache"
 	"github.com/eiladin/tldr/config"
-	"github.com/eiladin/tldr/renderer"
+	"github.com/eiladin/tldr/page"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -44,41 +44,42 @@ func main() {
 	if *update {
 		fmt.Println("Refreshing Cache")
 		cache.Refresh()
-	} else if *random {
+	}
+
+	if *random {
 		markdown, err := cache.FetchRandom(osName)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatalf("ERROR: getting random page: %s", err)
 		}
-		if markdown != nil {
-			defer markdown.Close()
-		}
-		err = renderer.Write(markdown, os.Stdout)
+		defer markdown.Close()
+		err = page.Write(markdown, os.Stdout)
 		if err != nil {
 			log.Fatalf("ERROR: rendering markdown: %s", err)
 		}
 	} else {
-		page := ""
+		cmd := ""
 		for i, l := range *pages {
 			if i == len(*pages)-1 {
-				page = page + l
+				cmd = cmd + l
 				break
 			} else {
-				page = page + l + "-"
+				cmd = cmd + l + "-"
 			}
 		}
-		if page == "" {
-			kingpin.Fatalf("required argument 'command' not provided, try --help")
+		if cmd == "" {
+			if !*update {
+				kingpin.Fatalf("required argument 'command' not provided, try --help")
+				return
+			}
 			return
 		}
-		markdown, err := cache.Fetch(osName, page)
+		markdown, err := cache.Fetch(osName, cmd)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		if markdown != nil {
-			defer markdown.Close()
-		}
-		err = renderer.Write(markdown, os.Stdout)
+		defer markdown.Close()
+		err = page.Write(markdown, os.Stdout)
 		if err != nil {
 			log.Fatalf("ERROR: rendering markdown: %s", err)
 		}

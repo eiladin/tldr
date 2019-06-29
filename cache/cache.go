@@ -40,13 +40,11 @@ func Create(remote string, ttl time.Duration) (*Cache, error) {
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		err = cache.createAndLoad()
-		if err != nil {
+		if err = cache.createAndLoad(); err != nil {
 			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
 		}
 	} else if err != nil || info.ModTime().Before(time.Now().Add(-ttl)) {
-		err = cache.Refresh()
-		if err != nil {
+		if err = cache.Refresh(); err != nil {
 			return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
 		}
 	}
@@ -56,12 +54,10 @@ func Create(remote string, ttl time.Duration) (*Cache, error) {
 
 // Refresh the cache with the latest info
 func (cache *Cache) Refresh() error {
-	err := os.RemoveAll(cache.location)
-	if err != nil {
+	if err := os.RemoveAll(cache.location); err != nil {
 		return fmt.Errorf("ERROR: removing cache directory: %s", err)
 	}
-	err = cache.createAndLoad()
-	if err != nil {
+	if err := cache.createAndLoad(); err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
 	}
 	return nil
@@ -69,25 +65,27 @@ func (cache *Cache) Refresh() error {
 
 // Fetch a specific page from cache
 func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, error) {
-	filePath := path.Join(cache.location, pagesDirectory, platform, page+pageSuffix)
-	_, err := os.Stat(filePath)
-	if os.IsNotExist(err) {
-		filePath = path.Join(cache.location, pagesDirectory, "common", page+pageSuffix)
-		_, err = os.Stat(filePath)
-		if os.IsNotExist(err) {
-			return nil, errors.New("This page (" + page + ") doesn't exist yet!\n" +
-				"Submit new pages here: https://github.com/tldr-pages/tldr")
+	platformPath := path.Join(cache.location, pagesDirectory, platform, page+pageSuffix)
+	commonPath := path.Join(cache.location, pagesDirectory, "common", page+pageSuffix)
+
+	paths := []string{platformPath, commonPath}
+	for _, p := range paths {
+		if _, err := os.Stat(p); os.IsNotExist(err) {
+			continue
+		} else {
+			return os.Open(p)
 		}
 	}
 
-	return os.Open(filePath)
+	return nil, errors.New("This page (" + page + ") does not exist yet!\n" +
+		"Submit new pages here: https://github.com/tldr-pages/tldr")
 }
 
 // FetchRandom returns a random page from cache
 func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
-	cmn := path.Join(cache.location, pagesDirectory, "common")
-	plt := path.Join(cache.location, pagesDirectory, platform)
-	paths := []string{cmn, plt}
+	commonPath := path.Join(cache.location, pagesDirectory, "common")
+	platformPath := path.Join(cache.location, pagesDirectory, platform)
+	paths := []string{commonPath, platformPath}
 	srcs := make([]string, 0)
 	for _, p := range paths {
 		files, err := ioutil.ReadDir(p)
@@ -106,12 +104,10 @@ func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
 }
 
 func (cache *Cache) createAndLoad() error {
-	err := cache.createCacheFolder()
-	if err != nil {
+	if err := cache.createCacheFolder(); err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
 	}
-	err = cache.loadFromRemote()
-	if err != nil {
+	if err := cache.loadFromRemote(); err != nil {
 		return fmt.Errorf("ERROR: loading data from remote: %s", err)
 	}
 	return nil
@@ -124,7 +120,7 @@ func (cache *Cache) createCacheFolder() error {
 func (cache *Cache) loadFromRemote() error {
 	dir, err := os.Create(cache.location + zipPath)
 	if err != nil {
-		return fmt.Errorf("ERROR: creating cache: %s", err)
+		return fmt.Errorf("ERROR: creating cache folder: %s", err)
 	}
 	defer dir.Close()
 
@@ -134,18 +130,15 @@ func (cache *Cache) loadFromRemote() error {
 	}
 	defer resp.Body.Close()
 
-	_, err = io.Copy(dir, resp.Body)
-	if err != nil {
+	if _, err = io.Copy(dir, resp.Body); err != nil {
 		return fmt.Errorf("ERROR: saving zip to cache: %s", err)
 	}
 
-	_, err = zip.Extract(cache.location+zipPath, cache.location)
-	if err != nil {
+	if _, err = zip.Extract(cache.location+zipPath, cache.location); err != nil {
 		return fmt.Errorf("ERROR: extracting zip: %s", err)
 	}
 
-	err = os.Remove(cache.location + zipPath)
-	if err != nil {
+	if err = os.Remove(cache.location + zipPath); err != nil {
 		return fmt.Errorf("ERROR: removing zip file: %s", err)
 	}
 	return nil
