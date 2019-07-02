@@ -3,22 +3,42 @@ package page
 import (
 	"bufio"
 	"io"
-	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
 )
 
-var bold = color.New(color.Bold)
+var (
+	titleText         = color.New(color.Bold)
+	tagText           = color.New(color.Italic).Add(color.FgHiBlue)
+	descriptionText   = color.New(color.FgYellow)
+	exampleHeaderText = color.New(color.FgHiGreen)
+	exampleText       = color.New(color.FgWhite)
+	normalText        = color.New(color.FgWhite)
+)
 
-func replaceTags(line *string) {
-	re := regexp.MustCompile(`\{\{(.*?)\}\}`)
-	keys := re.FindAllString(*line, -1)
-	for _, ele := range keys {
-		repl := strings.Trim(ele, "{{")
-		repl = strings.Trim(repl, "}}")
-		*line = strings.Replace(*line, ele, color.HiBlueString(repl), -1)
+func formatLine(line string) (formattedLine string) {
+	line = strings.TrimSpace(line)
+	line = strings.Replace(line, "``", "", -1)
+
+	for _, part := range strings.Split(line, "`") {
+		if len(part) == 0 {
+			continue
+		}
+		inTag := strings.HasPrefix(part, "{{")
+		for _, segment := range strings.Split(part, "{{") {
+			for _, piece := range strings.Split(segment, "}}") {
+				if inTag {
+					formattedLine += tagText.Sprint(piece)
+				} else {
+					formattedLine += exampleText.Sprint(piece)
+				}
+				inTag = !inTag
+			}
+		}
 	}
+
+	return
 }
 
 func render(markdown io.Reader) (string, error) {
@@ -27,18 +47,18 @@ func render(markdown io.Reader) (string, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "#") {
-			rendered += bold.Sprint(line[2:]) + "\n"
+			rendered += titleText.Sprintln(line[2:])
 		} else if strings.HasPrefix(line, ">") {
-			rendered += color.YellowString(line[2:]) + "\n"
+			rendered += descriptionText.Sprintln(line[2:])
 		} else if strings.HasPrefix(line, "-") {
-			rendered += color.CyanString(line) + "\n"
+			rendered += exampleHeaderText.Sprintln(line)
 			scanner.Scan()
 			scanner.Scan()
 			line = scanner.Text()
-			replaceTags(&line)
-			rendered += color.WhiteString(strings.Trim(line, "`")) + "\n"
+			line = formatLine(line)
+			rendered += line + "\n"
 		} else {
-			rendered += color.WhiteString(line) + "\n"
+			rendered += normalText.Sprintln(line)
 		}
 	}
 	return rendered, scanner.Err()
