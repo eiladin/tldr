@@ -36,5 +36,5 @@ func Write(markdown io.Reader, dest io.Writer, platform string, color bool) erro
 	if color {
 		return render(markdown, dest, platform, new(pagerenderer.ColorRenderer))
 	}
-	return render(markdown, dest, platform, new(pagerenderer.NormalRenderer))
+	return render(markdown, dest, platform, new(pagerenderer.UnformattedRenderer))
 }
