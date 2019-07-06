@@ -51,7 +51,6 @@ var rootCmd = &cobra.Command{
 
 		var markdown io.ReadCloser
 		pform := platform
-
 		if random {
 			markdown, pform, err = cache.FetchRandom(platform)
 			if err != nil {
@@ -67,6 +66,10 @@ var rootCmd = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
+		}
+
+		if pform != platform {
+			pform = fmt.Sprintf("%s (%s)", platform, pform)
 		}
 
 		defer markdown.Close()

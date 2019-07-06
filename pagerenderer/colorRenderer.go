@@ -8,16 +8,20 @@ import (
 )
 
 var (
-	titleText         = color.New(color.Bold)
+	titleText         = color.New(color.Bold, color.FgWhite)
 	platformText      = color.New(color.FgHiBlack)
-	tagText           = color.New(color.Italic).Add(color.FgHiBlue)
-	descriptionText   = color.New(color.FgYellow)
+	tagText           = color.New(color.Italic, color.FgHiBlue)
+	descriptionText   = color.New(color.FgHiYellow)
 	exampleHeaderText = color.New(color.FgHiGreen)
 	exampleText       = color.New(color.FgWhite)
 )
 
 // ColorRenderer implements Renderer and prints with color and formatting
 type ColorRenderer struct{}
+
+func colorize(str string, clr *color.Color) string {
+	return clr.Sprint(str)
+}
 
 func formatSyntaxLine(line string) string {
 	formattedLine := ""
@@ -28,9 +32,9 @@ func formatSyntaxLine(line string) string {
 	for _, segment := range strings.Split(line, "{{") {
 		for _, piece := range strings.Split(segment, "}}") {
 			if inTag {
-				formattedLine += tagText.Sprint(piece)
+				formattedLine += colorize(piece, tagText)
 			} else {
-				formattedLine += exampleText.Sprint(piece)
+				formattedLine += colorize(piece, exampleText)
 			}
 			inTag = !inTag
 		}
@@ -41,22 +45,22 @@ func formatSyntaxLine(line string) string {
 
 // RenderTitle returns a formatted title
 func (renderer ColorRenderer) RenderTitle(line string) string {
-	return titleText.Sprintln(line)
+	return fmt.Sprintln(colorize(line, titleText))
 }
 
 // RenderPlatform returns a formatted platform
 func (renderer ColorRenderer) RenderPlatform(line string) string {
-	return platformText.Sprintln(line)
+	return fmt.Sprintln(colorize(line, platformText))
 }
 
 // RenderDescription returns a formatted description
 func (renderer ColorRenderer) RenderDescription(line string) string {
-	return descriptionText.Sprintln(line)
+	return fmt.Sprintln(colorize(line, descriptionText))
 }
 
 // RenderExample returns a formatted example header
 func (renderer ColorRenderer) RenderExample(line string) string {
-	return exampleHeaderText.Sprintln(line)
+	return fmt.Sprintln(colorize(line, exampleHeaderText))
 }
 
 // RenderSyntax returns formatted example syntax
