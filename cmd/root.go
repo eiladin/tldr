@@ -23,7 +23,7 @@ const (
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:   "tldr-cobra",
+	Use:   "tldr",
 	Short: "Everyday help for everyday commands",
 	Long:  `Everyday help for everyday commands`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -38,6 +38,7 @@ var rootCmd = &cobra.Command{
 		update, _ := cmd.Flags().GetBool("update")
 		platform, _ := cmd.Flags().GetString("platform")
 		random, _ := cmd.Flags().GetBool("random")
+		color, _ := cmd.Flags().GetBool("color")
 
 		cache, err := cache.Create(remoteURL, ttl)
 		if err != nil {
@@ -45,7 +46,6 @@ var rootCmd = &cobra.Command{
 		}
 
 		if update {
-			fmt.Println("Refreshing Cache")
 			cache.Refresh()
 		}
 
@@ -58,6 +58,9 @@ var rootCmd = &cobra.Command{
 			}
 		} else {
 			cmd := strings.Join(args, "-")
+			if update && cmd == "" {
+				return
+			}
 			markdown, err = cache.Fetch(platform, cmd)
 			if err != nil {
 				fmt.Println(err)
@@ -66,8 +69,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		defer markdown.Close()
-		err = page.Write(markdown, os.Stdout)
-		if err != nil {
+		if err = page.Write(markdown, os.Stdout, color); err != nil {
 			log.Fatalf("ERROR: rendering page: %s", err)
 		}
 	},
@@ -86,4 +88,5 @@ func init() {
 	rootCmd.Flags().BoolP("update", "u", false, fmt.Sprintf("Clear local cache and update from %s", remoteURL))
 	rootCmd.Flags().BoolP("random", "r", false, "Random page for testing purposes.")
 	rootCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (linux, osx, sunos, windows, common)")
+	rootCmd.Flags().BoolP("color", "c", true, "Pretty Print (color and formatting)")
 }

@@ -54,12 +54,14 @@ func Create(remote string, ttl time.Duration) (*Cache, error) {
 
 // Refresh the cache with the latest info
 func (cache *Cache) Refresh() error {
+	fmt.Print("Refreshing Cache ... ")
 	if err := os.RemoveAll(cache.location); err != nil {
 		return fmt.Errorf("ERROR: removing cache directory: %s", err)
 	}
 	if err := cache.createAndLoad(); err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
 	}
+	fmt.Println("Done")
 	return nil
 }
 
