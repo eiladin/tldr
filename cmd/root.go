@@ -50,9 +50,10 @@ var rootCmd = &cobra.Command{
 		}
 
 		var markdown io.ReadCloser
+		pform := platform
 
 		if random {
-			markdown, err = cache.FetchRandom(platform)
+			markdown, pform, err = cache.FetchRandom(platform)
 			if err != nil {
 				log.Fatalf("ERROR: getting random page: %s", err)
 			}
@@ -61,7 +62,7 @@ var rootCmd = &cobra.Command{
 			if update && cmd == "" {
 				return
 			}
-			markdown, err = cache.Fetch(platform, cmd)
+			markdown, pform, err = cache.Fetch(platform, cmd)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -69,7 +70,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		defer markdown.Close()
-		if err = page.Write(markdown, os.Stdout, color); err != nil {
+		if err = page.Write(markdown, os.Stdout, pform, color); err != nil {
 			log.Fatalf("ERROR: rendering page: %s", err)
 		}
 	},

@@ -9,6 +9,7 @@ import (
 
 var (
 	titleText         = color.New(color.Bold)
+	platformText      = color.New(color.FgHiBlack)
 	tagText           = color.New(color.Italic).Add(color.FgHiBlue)
 	descriptionText   = color.New(color.FgYellow)
 	exampleHeaderText = color.New(color.FgHiGreen)
@@ -41,6 +42,11 @@ func formatSyntaxLine(line string) string {
 // RenderTitle returns a formatted title
 func (renderer ColorRenderer) RenderTitle(line string) string {
 	return titleText.Sprintln(line)
+}
+
+// RenderPlatform returns a formatted platform
+func (renderer ColorRenderer) RenderPlatform(line string) string {
+	return platformText.Sprintln(line)
 }
 
 // RenderDescription returns a formatted description

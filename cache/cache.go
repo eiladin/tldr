@@ -66,27 +66,33 @@ func (cache *Cache) Refresh() error {
 }
 
 // Fetch a specific page from cache
-func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, error) {
+func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, string, error) {
+	pform := platform
 	platformPath := path.Join(cache.location, pagesDirectory, platform, page+pageSuffix)
 	commonPath := path.Join(cache.location, pagesDirectory, "common", page+pageSuffix)
 
 	paths := []string{platformPath, commonPath}
 	for _, p := range paths {
+		if p == commonPath {
+			pform = "common"
+		}
 		if _, err := os.Stat(p); os.IsNotExist(err) {
 			continue
 		} else {
-			return os.Open(p)
+			closer, err := os.Open(p)
+			return closer, pform, err
 		}
 	}
 
-	return nil, errors.New("This page (" + page + ") does not exist yet!\n" +
+	return nil, "", errors.New("This page (" + page + ") does not exist yet!\n" +
 		"Submit new pages here: https://github.com/tldr-pages/tldr")
 }
 
 // FetchRandom returns a random page from cache
-func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
+func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, string, error) {
 	commonPath := path.Join(cache.location, pagesDirectory, "common")
 	platformPath := path.Join(cache.location, pagesDirectory, platform)
+	pform := platform
 	paths := []string{commonPath, platformPath}
 	srcs := make([]string, 0)
 	for _, p := range paths {
@@ -102,7 +108,11 @@ func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, error) {
 	}
 	rand.Seed(time.Now().UTC().UnixNano())
 	page := srcs[rand.Intn(len(srcs))]
-	return os.Open(page)
+	if strings.Contains(page, "common") {
+		pform = "common"
+	}
+	reader, err := os.Open(page)
+	return reader, pform, err
 }
 
 func (cache *Cache) createAndLoad() error {

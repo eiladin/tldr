@@ -1,12 +1,20 @@
 package pagerenderer
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // NormalRenderer implements PageRenderer and prints without color and pretty formatting
 type NormalRenderer struct{}
 
 // RenderTitle returns an unformatted title
 func (renderer NormalRenderer) RenderTitle(line string) string {
+	return fmt.Sprintln(line)
+}
+
+// RenderPlatform returns an unfromatted platform
+func (renderer NormalRenderer) RenderPlatform(line string) string {
 	return fmt.Sprintln(line)
 }
 
@@ -22,5 +30,6 @@ func (renderer NormalRenderer) RenderExample(line string) string {
 
 // RenderSyntax returns unformatted example syntax
 func (renderer NormalRenderer) RenderSyntax(line string) string {
+	line = strings.Replace(line, "`", "", -1)
 	return fmt.Sprintln(line)
 }
