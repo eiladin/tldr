@@ -1,4 +1,4 @@
-package pagerenderer
+package renderer
 
 // PageRenderer is an interface for rendering the output of a page
 type PageRenderer interface {

@@ -1,4 +1,4 @@
-package pagerenderer
+package renderer
 
 import (
 	"fmt"
@@ -27,6 +27,8 @@ func formatSyntaxLine(line string) string {
 	formattedLine := ""
 	line = strings.TrimSpace(line)
 	line = strings.Replace(line, "`", "", -1)
+	line = strings.Replace(line, "{{}}", "", -1)
+	line = strings.Replace(line, "}}{{", "", -1)
 
 	inTag := strings.HasPrefix(line, "{{")
 	for _, segment := range strings.Split(line, "{{") {

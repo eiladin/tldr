@@ -67,7 +67,7 @@ func FindPage(cmd *cobra.Command, args []string) {
 }
 
 func findPage(update bool, platform string, random bool, color bool, args ...string) {
-	cache, err := cache.Create(remoteURL, ttl)
+	cache, err := cache.Create(remoteURL, ttl, "")
 	if err != nil {
 		log.Fatalf("ERROR: creating cache: %s", err)
 	}

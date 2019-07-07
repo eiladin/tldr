@@ -1,4 +1,4 @@
-package pagerenderer
+package renderer
 
 import (
 	"fmt"

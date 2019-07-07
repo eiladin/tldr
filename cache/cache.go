@@ -30,8 +30,8 @@ type Cache struct {
 }
 
 // Create a new Cache and populate it
-func Create(remote string, ttl time.Duration) (*Cache, error) {
-	dir, err := getCacheDir()
+func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
+	dir, err := getCacheDir(folder)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
 	}
@@ -156,13 +156,16 @@ func (cache *Cache) loadFromRemote() error {
 	return nil
 }
 
-func getCacheDir() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", fmt.Errorf("ERROR: getting current user: %s", err)
+func getCacheDir(folder string) (string, error) {
+	if folder == "" {
+		usr, err := user.Current()
+		if err != nil {
+			return "", fmt.Errorf("ERROR: getting current user: %s", err)
+		}
+		if usr.HomeDir == "" {
+			return "", fmt.Errorf("ERROR: loading current user's home directory")
+		}
+		return path.Join(usr.HomeDir, ".tldr"), nil
 	}
-	if usr.HomeDir == "" {
-		return "", fmt.Errorf("ERROR: loading current user's home directory")
-	}
-	return path.Join(usr.HomeDir, ".tldr"), nil
+	return folder, nil
 }

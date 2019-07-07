@@ -6,10 +6,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/eiladin/tldr/pagerenderer"
+	"github.com/eiladin/tldr/renderer"
 )
 
-func render(markdown io.Reader, dest io.Writer, platform string, r pagerenderer.PageRenderer) error {
+func render(markdown io.Reader, dest io.Writer, platform string, r renderer.PageRenderer) error {
 	scanner := bufio.NewScanner(markdown)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -34,7 +34,7 @@ func render(markdown io.Reader, dest io.Writer, platform string, r pagerenderer.
 // Write the contents of markdown to dest
 func Write(markdown io.Reader, dest io.Writer, platform string, color bool) error {
 	if color {
-		return render(markdown, dest, platform, new(pagerenderer.ColorRenderer))
+		return render(markdown, dest, platform, new(renderer.ColorRenderer))
 	}
-	return render(markdown, dest, platform, new(pagerenderer.UnformattedRenderer))
+	return render(markdown, dest, platform, new(renderer.UnformattedRenderer))
 }
