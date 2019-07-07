@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Extract will unzip src into dest folder, creating dest folder if it does not exist
 func Extract(src string, dest string) ([]string, error) {
 
 	var filenames []string
