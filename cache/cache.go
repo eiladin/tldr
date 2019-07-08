@@ -24,9 +24,9 @@ const (
 
 // Cache stuct
 type Cache struct {
-	location string
-	remote   string
-	ttl      time.Duration
+	Location string
+	Remote   string
+	Ttl      time.Duration
 }
 
 // Create a new Cache and populate it
@@ -36,7 +36,7 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
 	}
 
-	cache := &Cache{location: dir, remote: remote, ttl: ttl}
+	cache := &Cache{Location: dir, Remote: remote, Ttl: ttl}
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
@@ -55,7 +55,7 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 // Refresh the cache with the latest info
 func (cache *Cache) Refresh() error {
 	fmt.Print("Refreshing Cache ... ")
-	if err := os.RemoveAll(cache.location); err != nil {
+	if err := os.RemoveAll(cache.Location); err != nil {
 		return fmt.Errorf("ERROR: removing cache directory: %s", err)
 	}
 	if err := cache.createAndLoad(); err != nil {
@@ -68,8 +68,8 @@ func (cache *Cache) Refresh() error {
 // Fetch a specific page from cache
 func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, string, error) {
 	pform := platform
-	platformPath := path.Join(cache.location, pagesDirectory, platform, page+pageSuffix)
-	commonPath := path.Join(cache.location, pagesDirectory, "common", page+pageSuffix)
+	platformPath := path.Join(cache.Location, pagesDirectory, platform, page+pageSuffix)
+	commonPath := path.Join(cache.Location, pagesDirectory, "common", page+pageSuffix)
 
 	paths := []string{platformPath, commonPath}
 	for _, p := range paths {
@@ -90,8 +90,8 @@ func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, string, error) 
 
 // FetchRandom returns a random page from cache
 func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, string, error) {
-	commonPath := path.Join(cache.location, pagesDirectory, "common")
-	platformPath := path.Join(cache.location, pagesDirectory, platform)
+	commonPath := path.Join(cache.Location, pagesDirectory, "common")
+	platformPath := path.Join(cache.Location, pagesDirectory, platform)
 	pform := platform
 	paths := []string{commonPath, platformPath}
 	srcs := make([]string, 0)
@@ -126,17 +126,17 @@ func (cache *Cache) createAndLoad() error {
 }
 
 func (cache *Cache) createCacheFolder() error {
-	return os.MkdirAll(cache.location, 0755)
+	return os.MkdirAll(cache.Location, 0755)
 }
 
 func (cache *Cache) loadFromRemote() error {
-	dir, err := os.Create(cache.location + zipPath)
+	dir, err := os.Create(cache.Location + zipPath)
 	if err != nil {
 		return fmt.Errorf("ERROR: creating cache folder: %s", err)
 	}
 	defer dir.Close()
 
-	resp, err := http.Get(cache.remote)
+	resp, err := http.Get(cache.Remote)
 	if err != nil {
 		return fmt.Errorf("ERROR: downloading zip: %s", err)
 	}
@@ -146,11 +146,11 @@ func (cache *Cache) loadFromRemote() error {
 		return fmt.Errorf("ERROR: saving zip to cache: %s", err)
 	}
 
-	if _, err = zip.Extract(cache.location+zipPath, cache.location); err != nil {
+	if _, err = zip.Extract(cache.Location+zipPath, cache.Location); err != nil {
 		return fmt.Errorf("ERROR: extracting zip: %s", err)
 	}
 
-	if err = os.Remove(cache.location + zipPath); err != nil {
+	if err = os.Remove(cache.Location + zipPath); err != nil {
 		return fmt.Errorf("ERROR: removing zip file: %s", err)
 	}
 	return nil

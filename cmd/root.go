@@ -15,10 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
-	ttl       = time.Hour * 24 * 7
-)
+const remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
 
 var cfgFile string
 
@@ -63,11 +60,16 @@ func FindPage(cmd *cobra.Command, args []string) {
 	platform, _ := cmd.Flags().GetString("platform")
 	random, _ := cmd.Flags().GetBool("random")
 	color, _ := cmd.Flags().GetBool("color")
-	findPage(update, platform, random, color, args...)
+	settings := cache.Cache{
+		Ttl:      time.Hour * 7 * 24,
+		Remote:   remoteURL,
+		Location: "",
+	}
+	findPage(update, platform, random, color, settings, args...)
 }
 
-func findPage(update bool, platform string, random bool, color bool, args ...string) {
-	cache, err := cache.Create(remoteURL, ttl, "")
+func findPage(update bool, platform string, random bool, color bool, settings cache.Cache, args ...string) {
+	cache, err := cache.Create(settings.Remote, settings.Ttl, settings.Location)
 	if err != nil {
 		log.Fatalf("ERROR: creating cache: %s", err)
 	}
