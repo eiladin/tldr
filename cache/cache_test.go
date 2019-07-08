@@ -53,6 +53,9 @@ func TestFetch(t *testing.T) {
 		assert.Equal(t, test.outPlatform, pform, fmt.Sprintf("Platform should match: %s", test.outPlatform))
 		readCloser.Close()
 	}
+
+	_, _, err := cache.Fetch("linux", "qwaszx")
+	assert.Error(t, err, "Should result in a not exist error")
 }
 
 func TestRandom(t *testing.T) {
