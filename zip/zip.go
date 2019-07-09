@@ -21,15 +21,12 @@ func Extract(src string, dest string) ([]string, error) {
 	defer r.Close()
 
 	for _, f := range r.File {
-
 		fpath := filepath.Join(dest, f.Name)
-
 		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
 			return filenames, fmt.Errorf("ERROR: illegal file path: %s", fpath)
 		}
 
 		filenames = append(filenames, fpath)
-
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(fpath, os.ModePerm)
 			continue

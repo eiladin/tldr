@@ -137,10 +137,12 @@ func (cache *Cache) loadFromRemote() error {
 	defer dir.Close()
 
 	resp, err := http.Get(cache.Remote)
-	if err != nil {
+	if resp.Body != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil || resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("ERROR: downloading zip: %s", err)
 	}
-	defer resp.Body.Close()
 
 	if _, err = io.Copy(dir, resp.Body); err != nil {
 		return fmt.Errorf("ERROR: saving zip to cache: %s", err)

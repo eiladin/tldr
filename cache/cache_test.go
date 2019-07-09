@@ -14,7 +14,7 @@ import (
 
 const (
 	remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
-	ttl       = time.Hour * 24 * 7
+	ttl       = time.Minute
 	location  = "./tldr-tests"
 )
 
@@ -56,6 +56,48 @@ func TestFetch(t *testing.T) {
 
 	_, _, err := cache.Fetch("linux", "qwaszx")
 	assert.Error(t, err, "Should result in a not exist error")
+}
+
+func TestLoadFromRemote(t *testing.T) {
+	tests := []struct {
+		remote    string
+		location  string
+		fileMode  os.FileMode
+		shouldErr bool
+	}{
+		{remoteURL, "./tldr-load", 0755, false},
+		{"https://github.com/eiladin/not-found.zip", "tldr-not-found", 0755, true},
+		{remoteURL, "./tldr-perm-error", 0100, true},
+	}
+
+	for _, test := range tests {
+		os.Mkdir(test.location, test.fileMode)
+		cache := Cache{Ttl: ttl, Location: test.location, Remote: test.remote}
+		err := cache.loadFromRemote()
+		if test.shouldErr {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+		os.RemoveAll(test.location)
+	}
+}
+
+func TestCreateAndLoad(t *testing.T) {
+	os.Mkdir("./tldr-fail", 0100)
+	cache := Cache{Ttl: time.Minute, Location: "./tldr-fail", Remote: remoteURL}
+	err := cache.createAndLoad()
+	assert.Error(t, err)
+	os.RemoveAll("./tldr-fail")
+}
+
+func TestCreateCacheFolder(t *testing.T) {
+	cache := Cache{Ttl: ttl, Location: "./tldr-create", Remote: remoteURL}
+	cache.createCacheFolder()
+	dir, err := os.Stat("./tldr-create")
+	assert.NoError(t, err, "There should be no error getting the directory")
+	assert.Equal(t, true, dir.IsDir())
+	os.RemoveAll(dir.Name())
 }
 
 func TestRandom(t *testing.T) {
