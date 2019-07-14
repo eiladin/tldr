@@ -13,15 +13,22 @@ builds:
     - linux
     - windows
     - darwin
+    - solaris
   goarch:
     - amd64
+    - 386
 archives:
 - replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+    darwin: macos
+    386: x86
+    amd64: x64
+  wrap_in_directory: true
+  format: tar.gz
+  format_overrides:
+    - goos: windows
+      format: zip
+  files:
+    - LICENSE
 checksum:
   name_template: 'checksums.txt'
 snapshot:
