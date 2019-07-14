@@ -18,7 +18,7 @@ func TestListPages(t *testing.T) {
 	settings := cache.Cache{
 		Remote:   "http://tldr-pages.github.com/assets/tldr.zip",
 		TTL:      time.Minute,
-		Location: "./tldr-list-test",
+		Location: "./tldr-list-cmd-test",
 	}
 
 	tests := []struct {
@@ -53,5 +53,5 @@ func TestListPages(t *testing.T) {
 		}
 	}
 
-	os.RemoveAll("./tldr-list-test")
+	os.RemoveAll(settings.Location)
 }

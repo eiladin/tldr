@@ -21,16 +21,12 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (linux, osx, sunos, windows, common)")
+	listCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
 }
 
 func listPages(cmd *cobra.Command, args []string) {
 	platform, _ := cmd.Flags().GetString("platform")
-	settings := cache.Cache{
-		TTL:    config.DefaultTTL,
-		Remote: config.DefaultRemoteURL,
-	}
-	listPlatformPages(settings, platform, args...)
+	listPlatformPages(cache.DefaultSettings, platform, args...)
 }
 
 func listPlatformPages(settings cache.Cache, platform string, args ...string) {

@@ -30,6 +30,12 @@ type Cache struct {
 	TTL      time.Duration
 }
 
+//DefaultSettings for the cache
+var DefaultSettings = Cache{
+	TTL:    time.Hour * 24 * 7,
+	Remote: "http://tldr-pages.github.com/assets/tldr.zip",
+}
+
 // Create a new Cache and populate it
 func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 	dir, err := getCacheDir(folder)
@@ -93,7 +99,6 @@ func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, string, error) 
 func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, string, error) {
 	commonPath := path.Join(cache.Location, pagesDirectory, "common")
 	platformPath := path.Join(cache.Location, pagesDirectory, platform)
-	pform := platform
 	paths := []string{commonPath, platformPath}
 	srcs := make([]string, 0)
 	for _, p := range paths {
@@ -110,15 +115,15 @@ func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, string, error) 
 	rand.Seed(time.Now().UTC().UnixNano())
 	page := srcs[rand.Intn(len(srcs))]
 	if strings.Contains(page, "common") {
-		pform = "common"
+		platform = "common"
 	}
 	reader, err := os.Open(page)
-	return reader, pform, err
+	return reader, platform, err
 }
 
 // ListPages returns all pages for a given platform
 func (cache *Cache) ListPages(platform string) ([]string, error) {
-	dir := path.Join(cache.Location, "pages", platform)
+	dir := path.Join(cache.Location, pagesDirectory, platform)
 	pages := []os.FileInfo{}
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() && strings.HasSuffix(f.Name(), ".md") {
@@ -136,6 +141,23 @@ func (cache *Cache) ListPages(platform string) ([]string, error) {
 		names[i] = name[:len(name)-3]
 	}
 	return names, nil
+}
+
+// AvailablePlatforms returns all platforms available in the cache
+func (cache *Cache) AvailablePlatforms() ([]string, error) {
+	var platforms []string
+	available, err := ioutil.ReadDir(path.Join(cache.Location, pagesDirectory))
+	if err != nil {
+		return nil, fmt.Errorf("ERROR: reading pages folder: %s", err)
+	}
+
+	for _, f := range available {
+		platform := f.Name()
+		if f.IsDir() {
+			platforms = append(platforms, platform)
+		}
+	}
+	return platforms, nil
 }
 
 func (cache *Cache) createAndLoad() error {

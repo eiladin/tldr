@@ -15,7 +15,7 @@ import (
 const (
 	remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
 	ttl       = time.Minute
-	location  = "./tldr-tests"
+	location  = "./cache-test"
 )
 
 var cache *Cache
@@ -84,17 +84,19 @@ func TestLoadFromRemote(t *testing.T) {
 }
 
 func TestCreateAndLoad(t *testing.T) {
-	os.Mkdir("./tldr-fail", 0100)
-	cache := Cache{TTL: time.Minute, Location: "./tldr-fail", Remote: remoteURL}
+	location := "./tldr-fail"
+	os.Mkdir(location, 0100)
+	cache := Cache{TTL: time.Minute, Location: location, Remote: remoteURL}
 	err := cache.createAndLoad()
 	assert.Error(t, err)
-	os.RemoveAll("./tldr-fail")
+	os.RemoveAll(location)
 }
 
 func TestCreateCacheFolder(t *testing.T) {
-	cache := Cache{TTL: ttl, Location: "./tldr-create", Remote: remoteURL}
+	location := "./cache-create"
+	cache := Cache{TTL: ttl, Location: location, Remote: remoteURL}
 	cache.createCacheFolder()
-	dir, err := os.Stat("./tldr-create")
+	dir, err := os.Stat(location)
 	assert.NoError(t, err, "There should be no error getting the directory")
 	assert.Equal(t, true, dir.IsDir())
 	os.RemoveAll(dir.Name())
@@ -173,4 +175,14 @@ func TestListPages(t *testing.T) {
 			assert.Contains(t, pages, expectation)
 		}
 	}
+}
+
+func TestAvailablePlatforms(t *testing.T) {
+	platforms, _ := cache.AvailablePlatforms()
+	assert.Len(t, platforms, 5, "There should be 5 available platforms")
+	assert.Contains(t, platforms, "common", "Platforms should contain 'common'")
+	assert.Contains(t, platforms, "linux", "Platforms should contain 'linux'")
+	assert.Contains(t, platforms, "osx", "Platforms should contain 'osx'")
+	assert.Contains(t, platforms, "sunos", "Platforms should contain 'sunos'")
+	assert.Contains(t, platforms, "windows", "Platforms should contain 'windows'")
 }

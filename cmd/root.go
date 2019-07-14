@@ -33,9 +33,9 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("update", "u", false, fmt.Sprintf("Clear local cache and update from %s", config.DefaultRemoteURL))
+	rootCmd.Flags().BoolP("update", "u", false, fmt.Sprintf("Clear local cache and update from %s", cache.DefaultSettings.Remote))
 	rootCmd.Flags().BoolP("random", "r", false, "Random page for testing purposes.")
-	rootCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (linux, osx, sunos, windows, common)")
+	rootCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
 	rootCmd.Flags().BoolP("color", "c", true, "Pretty Print (color and formatting)")
 }
 
@@ -55,11 +55,7 @@ func FindPage(cmd *cobra.Command, args []string) {
 	platform, _ := cmd.Flags().GetString("platform")
 	random, _ := cmd.Flags().GetBool("random")
 	color, _ := cmd.Flags().GetBool("color")
-	settings := cache.Cache{
-		TTL:    config.DefaultTTL,
-		Remote: config.DefaultRemoteURL,
-	}
-	findPage(update, platform, random, color, settings, args...)
+	findPage(update, platform, random, color, cache.DefaultSettings, args...)
 }
 
 func findPage(update bool, platform string, random bool, color bool, settings cache.Cache, args ...string) {
