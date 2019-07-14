@@ -53,5 +53,5 @@ func TestListPages(t *testing.T) {
 		}
 	}
 
-	os.RemoveAll("./tldr-test")
+	os.RemoveAll("./tldr-list-test")
 }
