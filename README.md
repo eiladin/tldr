@@ -11,7 +11,23 @@ run `tldr {command}` in a terminal where `{command}` is a standard cli command (
 * Allows override of the platform via the `--platform` argument
 * Allows for fetching a random page via the `--random` argument
 
-## Releasing
+## Homebrew (MacOS and LinuxBrew)
+
+Tap the cask:
+
+`brew tap eiladin/homebrew-tldr`
+
+Install tldr:
+
+`brew install eiladin/homebrew-tldr/tldr` 
+
+**Note:** there is a name-conflict on `tldr` so the full cask name must be used for install
+
+Uninstall tldr:
+
+`brew uninstall tldr`
+
+## Releases
 
 Releases are done through goreleaser (https://goreleaser.com)
 

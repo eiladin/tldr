@@ -38,7 +38,7 @@ var DefaultSettings = Cache{
 
 // Create a new Cache and populate it
 func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
-	dir, err := getCacheDir(folder)
+	dir, err := GetCacheDir(folder)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
 	}
@@ -51,7 +51,7 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
 		}
 	} else if err != nil || info.ModTime().Before(time.Now().Add(-ttl)) {
-		if err = cache.Refresh(nil); err != nil {
+		if err = cache.Refresh(); err != nil {
 			return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
 		}
 	}
@@ -60,18 +60,13 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 }
 
 // Refresh the cache with the latest info
-func (cache *Cache) Refresh(writer io.Writer) error {
-	if writer == nil {
-		writer = os.Stdout
-	}
-	fmt.Fprint(writer, "Refreshing Cache ... ")
+func (cache *Cache) Refresh() error {
 	if err := os.RemoveAll(cache.Location); err != nil {
 		return fmt.Errorf("ERROR: removing cache directory: %s", err)
 	}
 	if err := cache.createAndLoad(); err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
 	}
-	fmt.Fprintln(writer, "Done")
 	return nil
 }
 
@@ -174,6 +169,15 @@ func (cache *Cache) IsPlatformValid(platform string) bool {
 	return false
 }
 
+//Purge deletes the cache
+func (cache *Cache) Purge() error {
+	dir, err := GetCacheDir(cache.Location)
+	if err != nil {
+		return fmt.Errorf("ERROR: getting cache folder: %s", err)
+	}
+	return os.RemoveAll(dir)
+}
+
 func (cache *Cache) createAndLoad() error {
 	if err := cache.createCacheFolder(); err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
@@ -217,7 +221,8 @@ func (cache *Cache) loadFromRemote() error {
 	return nil
 }
 
-func getCacheDir(folder string) (string, error) {
+// GetCacheDir returns the path used for caching
+func GetCacheDir(folder string) (string, error) {
 	if folder == "" {
 		usr, err := user.Current()
 		if err != nil {

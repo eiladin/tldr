@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/user"
@@ -25,7 +24,7 @@ func CreateCache() *Cache {
 }
 
 func DestroyCache() {
-	os.RemoveAll(location)
+	cache.Purge()
 }
 
 func TestMain(m *testing.M) {
@@ -121,10 +120,8 @@ func TestFetchRandomPage(t *testing.T) {
 }
 
 func TestRefresh(t *testing.T) {
-	var b bytes.Buffer
-	cache.Refresh(&b)
-	out := b.String()
-	assert.Equal(t, "Refreshing Cache ... Done\n", out, "There should a refresh cache message")
+	err := cache.Refresh()
+	assert.NoError(t, err, "Refreshing Cache should not throw an error")
 
 }
 
@@ -138,7 +135,7 @@ func TestGetCacheDir(t *testing.T) {
 		{"test", "test"},
 	}
 	for _, test := range tests {
-		out, _ := getCacheDir(test.input)
+		out, _ := GetCacheDir(test.input)
 		assert.Equal(t, test.output, out, fmt.Sprintf("Expected: %s, Actual: %s", test.output, out))
 	}
 }
@@ -191,4 +188,24 @@ func TestIsPlatformValid(t *testing.T) {
 		isValid := cache.IsPlatformValid(test.platform)
 		assert.Equal(t, test.isValid, isValid)
 	}
+}
+
+func TestCacheInvalidation(t *testing.T) {
+	location := "./test-cache-invalidation"
+	Create(remoteURL, time.Millisecond, location)
+	now := time.Now()
+	Create(remoteURL, time.Millisecond, location)
+	info, _ := os.Stat(location)
+	assert.True(t, info.ModTime().After(now))
+	os.RemoveAll(location)
+}
+
+func TestPurge(t *testing.T) {
+	location := "./test-purge"
+	os.Mkdir(location, 0755)
+	purgeCache := Cache{
+		Location: location,
+		TTL:      time.Second,
+	}
+	purgeCache.Purge()
 }

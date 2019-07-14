@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"os"
 	"testing"
 	"time"
 
@@ -25,24 +24,24 @@ func TestFindPage(t *testing.T) {
 		platform     string
 		random       bool
 		color        bool
+		purge        bool
 		args         []string
 		expectations []string
 	}{
-		{true, "linux", false, false, []string{}, []string{"Refreshing Cache"}},
-		{false, "linux", false, false, []string{"git", "pull"}, []string{"git-pull", "linux", "common"}},
-		{false, "linux", true, false, []string{}, []string{"linux"}},
-		{false, "linux", true, true, []string{}, []string{"\x1b"}},
-		{false, "linux", false, false, []string{"qwaszx"}, []string{"This page (qwaszx) does not exist yet!"}},
+		{true, "linux", false, false, false, []string{}, []string{"Refreshing Cache"}},
+		{false, "linux", false, false, false, []string{"git", "pull"}, []string{"git-pull", "linux", "common"}},
+		{false, "linux", true, false, false, []string{}, []string{"linux"}},
+		{false, "linux", true, true, false, []string{}, []string{"\x1b"}},
+		{false, "linux", false, false, false, []string{"qwaszx"}, []string{"This page (qwaszx) does not exist yet!"}},
+		{false, "linux", false, false, true, []string{}, []string{"Clearing cache at " + settings.Location}},
 	}
 
 	for _, test := range tests {
 		var b bytes.Buffer
-		findPage(&b, test.update, test.platform, test.random, test.color, settings, test.args...)
+		findPage(&b, test.update, test.platform, test.random, test.color, test.purge, settings, test.args...)
 		out := b.String()
 		for _, expectation := range test.expectations {
 			assert.Contains(t, out, expectation)
 		}
 	}
-
-	os.RemoveAll(settings.Location)
 }

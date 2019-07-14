@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	Use:     "tldr",
 	Short:   "Everyday help for everyday commands",
 	Long:    `Everyday help for everyday commands`,
-	Version: "1.2.5",
+	Version: "1.2.6",
 	Args:    ValidateArgs,
 	Run:     FindPage,
 }
@@ -37,13 +37,15 @@ func init() {
 	rootCmd.Flags().BoolP("random", "r", false, "Random page for testing purposes.")
 	rootCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
 	rootCmd.Flags().BoolP("color", "c", true, "Pretty Print (color and formatting)")
+	rootCmd.Flags().BoolP("purge", "", false, "Clear local cache")
 }
 
 // ValidateArgs checks to make sure user input is valid before execution
 func ValidateArgs(cmd *cobra.Command, args []string) error {
 	update, _ := cmd.Flags().GetBool("update")
 	random, _ := cmd.Flags().GetBool("random")
-	if !random && !update && len(args) < 1 {
+	purge, _ := cmd.Flags().GetBool("purge")
+	if !random && !update && !purge && len(args) < 1 {
 		return errors.New("requires a command")
 	}
 	return nil
@@ -55,10 +57,23 @@ func FindPage(cmd *cobra.Command, args []string) {
 	platform, _ := cmd.Flags().GetString("platform")
 	random, _ := cmd.Flags().GetBool("random")
 	color, _ := cmd.Flags().GetBool("color")
-	findPage(os.Stdout, update, platform, random, color, cache.DefaultSettings, args...)
+	purge, _ := cmd.Flags().GetBool("purge")
+	findPage(os.Stdout, update, platform, random, color, purge, cache.DefaultSettings, args...)
 }
 
-func findPage(writer io.Writer, update bool, platform string, random bool, color bool, settings cache.Cache, args ...string) {
+func findPage(writer io.Writer, update bool, platform string, random bool, color bool, purge bool, settings cache.Cache, args ...string) {
+	if purge {
+		dir, err := cache.GetCacheDir(settings.Location)
+		if err != nil {
+			log.Fatalf("ERROR: getting cache dir: %s", err)
+		}
+		fmt.Fprintf(writer, "Clearing cache at %s\n", dir)
+		err = settings.Purge()
+		if err != nil {
+			log.Fatalf("ERROR: removing cache: %s", err)
+		}
+		return
+	}
 	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
 	platformValid := cache.IsPlatformValid(platform)
 	if !platformValid {
@@ -70,7 +85,9 @@ func findPage(writer io.Writer, update bool, platform string, random bool, color
 	}
 
 	if update {
-		cache.Refresh(writer)
+		fmt.Fprint(writer, "Refreshing Cache ... ")
+		cache.Refresh()
+		fmt.Fprintln(writer, "Done")
 	}
 
 	var markdown io.ReadCloser

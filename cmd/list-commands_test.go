@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"os"
 	"testing"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListPages(t *testing.T) {
+func TestPlatformListPages(t *testing.T) {
 	color.NoColor = false
 
 	settings := cache.Cache{
@@ -40,5 +39,5 @@ func TestListPages(t *testing.T) {
 		}
 	}
 
-	os.RemoveAll(settings.Location)
+	settings.Purge()
 }
