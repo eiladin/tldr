@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	Use:     "tldr",
 	Short:   "Everyday help for everyday commands",
 	Long:    `Everyday help for everyday commands`,
-	Version: "1.2.2",
+	Version: "1.2.3",
 	Args:    ValidateArgs,
 	Run:     FindPage,
 }
