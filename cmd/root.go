@@ -71,7 +71,7 @@ func findPage(update bool, platform string, random bool, color bool, settings ca
 	var markdown io.ReadCloser
 	pform := platform
 	if random {
-		markdown, pform, err = cache.FetchRandom(platform)
+		markdown, pform, err = cache.FetchRandomPage(platform)
 		if err != nil {
 			log.Fatalf("ERROR: getting random page: %s", err)
 		}
@@ -80,7 +80,7 @@ func findPage(update bool, platform string, random bool, color bool, settings ca
 		if update && cmd == "" {
 			return
 		}
-		markdown, pform, err = cache.Fetch(platform, cmd)
+		markdown, pform, err = cache.FetchPage(platform, cmd)
 		if err != nil {
 			fmt.Println(err)
 			return

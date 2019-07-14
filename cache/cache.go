@@ -72,8 +72,8 @@ func (cache *Cache) Refresh() error {
 	return nil
 }
 
-// Fetch a specific page from cache
-func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, string, error) {
+// FetchPage returns a specific page from cache
+func (cache *Cache) FetchPage(platform, page string) (io.ReadCloser, string, error) {
 	pform := platform
 	platformPath := path.Join(cache.Location, pagesDirectory, platform, page+pageSuffix)
 	commonPath := path.Join(cache.Location, pagesDirectory, "common", page+pageSuffix)
@@ -95,8 +95,8 @@ func (cache *Cache) Fetch(platform, page string) (io.ReadCloser, string, error) 
 		"Submit new pages here: https://github.com/tldr-pages/tldr")
 }
 
-// FetchRandom returns a random page from cache
-func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, string, error) {
+// FetchRandomPage returns a random page from cache
+func (cache *Cache) FetchRandomPage(platform string) (io.ReadCloser, string, error) {
 	commonPath := path.Join(cache.Location, pagesDirectory, "common")
 	platformPath := path.Join(cache.Location, pagesDirectory, platform)
 	paths := []string{commonPath, platformPath}

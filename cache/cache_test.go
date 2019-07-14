@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestFetch(t *testing.T) {
+func TestFetchPage(t *testing.T) {
 	tests := []struct {
 		platform    string
 		page        string
@@ -49,12 +49,12 @@ func TestFetch(t *testing.T) {
 		{"sunos", "dmesg", "sunos"},
 	}
 	for _, test := range tests {
-		readCloser, pform, _ := cache.Fetch(test.platform, test.page)
+		readCloser, pform, _ := cache.FetchPage(test.platform, test.page)
 		assert.Equal(t, test.outPlatform, pform, fmt.Sprintf("Platform should match: %s", test.outPlatform))
 		readCloser.Close()
 	}
 
-	_, _, err := cache.Fetch("linux", "qwaszx")
+	_, _, err := cache.FetchPage("linux", "qwaszx")
 	assert.Error(t, err, "Should result in a not exist error")
 }
 
@@ -102,7 +102,7 @@ func TestCreateCacheFolder(t *testing.T) {
 	os.RemoveAll(dir.Name())
 }
 
-func TestRandom(t *testing.T) {
+func TestFetchRandomPage(t *testing.T) {
 	tests := []struct {
 		platform     string
 		outPlatforms []string
@@ -115,7 +115,7 @@ func TestRandom(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		readCloser, pform, _ := cache.FetchRandom(test.platform)
+		readCloser, pform, _ := cache.FetchRandomPage(test.platform)
 		assert.Contains(t, test.outPlatforms, pform, fmt.Sprintf("Platform should be in: %s", test.outPlatforms))
 		readCloser.Close()
 	}
