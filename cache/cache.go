@@ -51,7 +51,7 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
 		}
 	} else if err != nil || info.ModTime().Before(time.Now().Add(-ttl)) {
-		if err = cache.Refresh(); err != nil {
+		if err = cache.Refresh(nil); err != nil {
 			return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
 		}
 	}
@@ -60,15 +60,18 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 }
 
 // Refresh the cache with the latest info
-func (cache *Cache) Refresh() error {
-	fmt.Print("Refreshing Cache ... ")
+func (cache *Cache) Refresh(writer io.Writer) error {
+	if writer == nil {
+		writer = os.Stdout
+	}
+	fmt.Fprint(writer, "Refreshing Cache ... ")
 	if err := os.RemoveAll(cache.Location); err != nil {
 		return fmt.Errorf("ERROR: removing cache directory: %s", err)
 	}
 	if err := cache.createAndLoad(); err != nil {
 		return fmt.Errorf("ERROR: creating cache directory: %s", err)
 	}
-	fmt.Println("Done")
+	fmt.Fprintln(writer, "Done")
 	return nil
 }
 
@@ -158,6 +161,17 @@ func (cache *Cache) AvailablePlatforms() ([]string, error) {
 		}
 	}
 	return platforms, nil
+}
+
+// IsPlatformValid ensures the provided platform is found in the cache
+func (cache *Cache) IsPlatformValid(platform string) bool {
+	platforms, _ := cache.AvailablePlatforms()
+	for _, p := range platforms {
+		if p == platform {
+			return true
+		}
+	}
+	return false
 }
 
 func (cache *Cache) createAndLoad() error {

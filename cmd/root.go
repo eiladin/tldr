@@ -55,17 +55,22 @@ func FindPage(cmd *cobra.Command, args []string) {
 	platform, _ := cmd.Flags().GetString("platform")
 	random, _ := cmd.Flags().GetBool("random")
 	color, _ := cmd.Flags().GetBool("color")
-	findPage(update, platform, random, color, cache.DefaultSettings, args...)
+	findPage(os.Stdout, update, platform, random, color, cache.DefaultSettings, args...)
 }
 
-func findPage(update bool, platform string, random bool, color bool, settings cache.Cache, args ...string) {
+func findPage(writer io.Writer, update bool, platform string, random bool, color bool, settings cache.Cache, args ...string) {
 	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
+	platformValid := cache.IsPlatformValid(platform)
+	if !platformValid {
+		availablePlatforms, _ := cache.AvailablePlatforms()
+		log.Fatalf("ERROR: platform %s not found\nAvailable platforms: %s", platform, strings.Join(availablePlatforms, ", "))
+	}
 	if err != nil {
 		log.Fatalf("ERROR: creating cache: %s", err)
 	}
 
 	if update {
-		cache.Refresh()
+		cache.Refresh(writer)
 	}
 
 	var markdown io.ReadCloser
@@ -82,7 +87,7 @@ func findPage(update bool, platform string, random bool, color bool, settings ca
 		}
 		markdown, pform, err = cache.FetchPage(platform, cmd)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(writer, err)
 			return
 		}
 	}
@@ -92,7 +97,7 @@ func findPage(update bool, platform string, random bool, color bool, settings ca
 	}
 
 	defer markdown.Close()
-	if err = page.Write(markdown, os.Stdout, pform, color); err != nil {
+	if err = page.Write(markdown, writer, pform, color); err != nil {
 		log.Fatalf("ERROR: rendering page: %s", err)
 	}
 }

@@ -1,14 +1,17 @@
 package renderer
 
 import (
+	"os"
 	"testing"
 
 	"github.com/fatih/color"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(M *testing.M) {
+func TestMain(m *testing.M) {
 	color.NoColor = false
+	code := m.Run()
+	os.Exit(code)
 }
 
 func TestColorRenderTitle(t *testing.T) {

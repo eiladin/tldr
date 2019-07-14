@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"io"
 	"os"
 	"testing"
 	"time"
@@ -33,21 +32,9 @@ func TestListPages(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		old := os.Stdout
-		r, w, _ := os.Pipe()
-		os.Stdout = w
-
-		listPlatformPages(settings, test.platform)
-
-		outC := make(chan string)
-		go func() {
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			outC <- buf.String()
-		}()
-		w.Close()
-		out := <-outC
-		os.Stdout = old
+		var b bytes.Buffer
+		listPlatformPages(&b, settings, test.platform)
+		out := b.String()
 		for _, expectation := range test.expectations {
 			assert.Contains(t, out, expectation)
 		}

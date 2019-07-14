@@ -3,7 +3,6 @@ package cache
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"os/user"
 	"testing"
@@ -122,21 +121,9 @@ func TestFetchRandomPage(t *testing.T) {
 }
 
 func TestRefresh(t *testing.T) {
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	cache.Refresh()
-
-	outC := make(chan string)
-	go func() {
-		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		outC <- buf.String()
-	}()
-	w.Close()
-	os.Stdout = old
-	out := <-outC
+	var b bytes.Buffer
+	cache.Refresh(&b)
+	out := b.String()
 	assert.Equal(t, "Refreshing Cache ... Done\n", out, "There should a refresh cache message")
 
 }
@@ -185,4 +172,23 @@ func TestAvailablePlatforms(t *testing.T) {
 	assert.Contains(t, platforms, "osx", "Platforms should contain 'osx'")
 	assert.Contains(t, platforms, "sunos", "Platforms should contain 'sunos'")
 	assert.Contains(t, platforms, "windows", "Platforms should contain 'windows'")
+}
+
+func TestIsPlatformValid(t *testing.T) {
+	tests := []struct {
+		platform string
+		isValid  bool
+	}{
+		{"common", true},
+		{"linux", true},
+		{"osx", true},
+		{"sunos", true},
+		{"windows", true},
+		{"fake", false},
+	}
+
+	for _, test := range tests {
+		isValid := cache.IsPlatformValid(test.platform)
+		assert.Equal(t, test.isValid, isValid)
+	}
 }
