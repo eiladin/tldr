@@ -1,6 +1,9 @@
 package config
 
-import "runtime"
+import (
+	"runtime"
+	"time"
+)
 
 // OSName will return the corrected name of the current platform
 func OSName() (n string) {
@@ -10,3 +13,10 @@ func OSName() (n string) {
 	}
 	return
 }
+
+const (
+	// DefaultTTL is 1 week
+	DefaultTTL = time.Hour * 24 * 7
+	// DefaultRemoteURL pulls from tldr-pages.github.com
+	DefaultRemoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
+)

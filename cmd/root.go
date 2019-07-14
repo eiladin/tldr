@@ -7,17 +7,12 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/eiladin/tldr/cache"
 	"github.com/eiladin/tldr/config"
 	"github.com/eiladin/tldr/page"
 	"github.com/spf13/cobra"
 )
-
-const remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
-
-var cfgFile string
 
 var rootCmd = &cobra.Command{
 	Use:     "tldr",
@@ -38,7 +33,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("update", "u", false, fmt.Sprintf("Clear local cache and update from %s", remoteURL))
+	rootCmd.Flags().BoolP("update", "u", false, fmt.Sprintf("Clear local cache and update from %s", config.DefaultRemoteURL))
 	rootCmd.Flags().BoolP("random", "r", false, "Random page for testing purposes.")
 	rootCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (linux, osx, sunos, windows, common)")
 	rootCmd.Flags().BoolP("color", "c", true, "Pretty Print (color and formatting)")
@@ -61,15 +56,14 @@ func FindPage(cmd *cobra.Command, args []string) {
 	random, _ := cmd.Flags().GetBool("random")
 	color, _ := cmd.Flags().GetBool("color")
 	settings := cache.Cache{
-		Ttl:      time.Hour * 7 * 24,
-		Remote:   remoteURL,
-		Location: "",
+		TTL:    config.DefaultTTL,
+		Remote: config.DefaultRemoteURL,
 	}
 	findPage(update, platform, random, color, settings, args...)
 }
 
 func findPage(update bool, platform string, random bool, color bool, settings cache.Cache, args ...string) {
-	cache, err := cache.Create(settings.Remote, settings.Ttl, settings.Location)
+	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
 	if err != nil {
 		log.Fatalf("ERROR: creating cache: %s", err)
 	}

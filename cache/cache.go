@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -26,7 +27,7 @@ const (
 type Cache struct {
 	Location string
 	Remote   string
-	Ttl      time.Duration
+	TTL      time.Duration
 }
 
 // Create a new Cache and populate it
@@ -36,7 +37,7 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
 	}
 
-	cache := &Cache{Location: dir, Remote: remote, Ttl: ttl}
+	cache := &Cache{Location: dir, Remote: remote, TTL: ttl}
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
@@ -113,6 +114,28 @@ func (cache *Cache) FetchRandom(platform string) (io.ReadCloser, string, error) 
 	}
 	reader, err := os.Open(page)
 	return reader, pform, err
+}
+
+// ListPages returns all pages for a given platform
+func (cache *Cache) ListPages(platform string) ([]string, error) {
+	dir := path.Join(cache.Location, "pages", platform)
+	pages := []os.FileInfo{}
+	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if !f.IsDir() && strings.HasSuffix(f.Name(), ".md") {
+			pages = append(pages, f)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("ERROR: getting pages list")
+	}
+
+	names := make([]string, len(pages))
+	for i, page := range pages {
+		name := page.Name()
+		names[i] = name[:len(name)-3]
+	}
+	return names, nil
 }
 
 func (cache *Cache) createAndLoad() error {

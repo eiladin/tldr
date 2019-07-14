@@ -17,7 +17,7 @@ func TestFindPage(t *testing.T) {
 
 	settings := cache.Cache{
 		Remote:   "http://tldr-pages.github.com/assets/tldr.zip",
-		Ttl:      time.Minute,
+		TTL:      time.Minute,
 		Location: "./tldr-test",
 	}
 

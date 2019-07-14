@@ -72,7 +72,7 @@ func TestLoadFromRemote(t *testing.T) {
 
 	for _, test := range tests {
 		os.Mkdir(test.location, test.fileMode)
-		cache := Cache{Ttl: ttl, Location: test.location, Remote: test.remote}
+		cache := Cache{TTL: ttl, Location: test.location, Remote: test.remote}
 		err := cache.loadFromRemote()
 		if test.shouldErr {
 			assert.Error(t, err)
@@ -85,14 +85,14 @@ func TestLoadFromRemote(t *testing.T) {
 
 func TestCreateAndLoad(t *testing.T) {
 	os.Mkdir("./tldr-fail", 0100)
-	cache := Cache{Ttl: time.Minute, Location: "./tldr-fail", Remote: remoteURL}
+	cache := Cache{TTL: time.Minute, Location: "./tldr-fail", Remote: remoteURL}
 	err := cache.createAndLoad()
 	assert.Error(t, err)
 	os.RemoveAll("./tldr-fail")
 }
 
 func TestCreateCacheFolder(t *testing.T) {
-	cache := Cache{Ttl: ttl, Location: "./tldr-create", Remote: remoteURL}
+	cache := Cache{TTL: ttl, Location: "./tldr-create", Remote: remoteURL}
 	cache.createCacheFolder()
 	dir, err := os.Stat("./tldr-create")
 	assert.NoError(t, err, "There should be no error getting the directory")
@@ -151,5 +151,26 @@ func TestGetCacheDir(t *testing.T) {
 	for _, test := range tests {
 		out, _ := getCacheDir(test.input)
 		assert.Equal(t, test.output, out, fmt.Sprintf("Expected: %s, Actual: %s", test.output, out))
+	}
+}
+
+func TestListPages(t *testing.T) {
+	tests := []struct {
+		platform     string
+		expectations []string
+	}{
+		{"common", []string{"curl", "ls"}},
+		{"linux", []string{"dmesg", "alpine"}},
+		{"osx", []string{"dmesg", "brew"}},
+		{"sunos", []string{"dmesg", "stty"}},
+		{"windows", []string{"rmdir", "mkdir"}},
+	}
+
+	for _, test := range tests {
+		pages, _ := cache.ListPages(test.platform)
+
+		for _, expectation := range test.expectations {
+			assert.Contains(t, pages, expectation)
+		}
 	}
 }
