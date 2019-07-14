@@ -14,3 +14,11 @@ run `tldr {command}` in a terminal where `{command}` is a standard cli command (
 ## Releasing
 
 Releases are done through goreleaser (https://goreleaser.com)
+
+If UPX is installed, then the binaries will be compressed
+
+### Step-by-step
+* Add tag (git tag -a v1.0.0 -m "message")
+* push tag (git push origin v1.0.0)
+* make publish
+

@@ -2,10 +2,8 @@
 # Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
-    # you may remove this if you don't use vgo
-    - go mod download
-    # you may remove this if you don't need go generate
-    - go generate ./...
+  - go mod download
+
 
 builds:
 - env:
@@ -18,6 +16,11 @@ builds:
   goarch:
     - amd64
     - 386
+  ldflags:
+    - -s -w
+  hooks:
+    post: make compress
+
 
 archives:
 - replacements:
