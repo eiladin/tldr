@@ -6,6 +6,7 @@ before:
     - go mod download
     # you may remove this if you don't need go generate
     - go generate ./...
+
 builds:
 - env:
   - CGO_ENABLED=0
@@ -17,6 +18,7 @@ builds:
   goarch:
     - amd64
     - 386
+
 archives:
 - replacements:
     darwin: macos
@@ -30,10 +32,27 @@ archives:
   files:
     - LICENSE
     - tldr-pages-LICENSE.md
+
+brews:
+- github:
+    owner: eiladin
+    name: homebrew-tldr
+  commit_author:
+    name: Sami Khan
+    email: eiladin@gmail.com
+  folder: Formula
+  description: "Simplified and community-driven man pages"
+  test: |
+    system "#{bin}/tldr -version"
+  install: |
+    bin.install "tldr"
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
   name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
