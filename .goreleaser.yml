@@ -43,10 +43,11 @@ brews:
   commit_author:
     name: Sami Khan
     email: eiladin@gmail.com
+  homepage: https://github.com/eiladin/tldr
   folder: Formula
   description: "Simplified and community-driven man pages"
   test: |
-    system "#{bin}/tldr -version"
+    system "#{bin}/tldr --version"
   install: |
     bin.install "tldr"
 
