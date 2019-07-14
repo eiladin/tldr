@@ -11,3 +11,6 @@ run `tldr {command}` in a terminal where `{command}` is a standard cli command (
 * Allows override of the platform via the `--platform` argument
 * Allows for fetching a random page via the `--random` argument
 
+## Releasing
+
+Releases are done through goreleaser (https://goreleaser.com)

@@ -41,4 +41,4 @@
 # End of https://www.gitignore.io/api/go,linux
 
 out/
-tldr-test/
+dist/
