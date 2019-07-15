@@ -16,9 +16,9 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:     "tldr",
-	Short:   "Everyday help for everyday commands",
-	Long:    `Everyday help for everyday commands`,
-	Version: "1.2.7",
+	Short:   "Simplified and community-driven man pages",
+	Long:    `Simplified and community-driven man pages`,
+	Version: "1.2.8",
 	Args:    ValidateArgs,
 	Run:     FindPage,
 }
@@ -63,21 +63,17 @@ func FindPage(cmd *cobra.Command, args []string) {
 
 func findPage(writer io.Writer, update bool, platform string, random bool, color bool, purge bool, settings cache.Cache, args ...string) {
 	if purge {
-		dir, err := cache.GetCacheDir(settings.Location)
-		if err != nil {
-			log.Fatalf("ERROR: getting cache dir: %s", err)
-		}
-		fmt.Fprintf(writer, "Clearing cache at %s\n", dir)
-		err = settings.Purge()
+		fmt.Fprintf(writer, "Clearing cache ... ")
+		err := settings.Purge()
 		if err != nil {
 			log.Fatalf("ERROR: removing cache: %s", err)
 		}
+		fmt.Fprintf(writer, "Done\n")
 		return
 	}
 	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
-	platformValid := cache.IsPlatformValid(platform)
+	platformValid, availablePlatforms := cache.IsPlatformValid(platform)
 	if !platformValid {
-		availablePlatforms, _ := cache.AvailablePlatforms()
 		log.Fatalf("ERROR: platform %s not found\nAvailable platforms: %s", platform, strings.Join(availablePlatforms, ", "))
 	}
 	if err != nil {

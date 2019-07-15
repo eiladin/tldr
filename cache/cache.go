@@ -38,7 +38,7 @@ var DefaultSettings = Cache{
 
 // Create a new Cache and populate it
 func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
-	dir, err := GetCacheDir(folder)
+	dir, err := getCacheDir(folder)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
 	}
@@ -159,19 +159,19 @@ func (cache *Cache) AvailablePlatforms() ([]string, error) {
 }
 
 // IsPlatformValid ensures the provided platform is found in the cache
-func (cache *Cache) IsPlatformValid(platform string) bool {
+func (cache *Cache) IsPlatformValid(platform string) (bool, []string) {
 	platforms, _ := cache.AvailablePlatforms()
 	for _, p := range platforms {
 		if p == platform {
-			return true
+			return true, platforms
 		}
 	}
-	return false
+	return false, platforms
 }
 
 //Purge deletes the cache
 func (cache *Cache) Purge() error {
-	dir, err := GetCacheDir(cache.Location)
+	dir, err := getCacheDir(cache.Location)
 	if err != nil {
 		return fmt.Errorf("ERROR: getting cache folder: %s", err)
 	}
@@ -221,8 +221,7 @@ func (cache *Cache) loadFromRemote() error {
 	return nil
 }
 
-// GetCacheDir returns the path used for caching
-func GetCacheDir(folder string) (string, error) {
+func getCacheDir(folder string) (string, error) {
 	if folder == "" {
 		usr, err := user.Current()
 		if err != nil {

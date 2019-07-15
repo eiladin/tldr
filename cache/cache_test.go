@@ -135,7 +135,7 @@ func TestGetCacheDir(t *testing.T) {
 		{"test", "test"},
 	}
 	for _, test := range tests {
-		out, _ := GetCacheDir(test.input)
+		out, _ := getCacheDir(test.input)
 		assert.Equal(t, test.output, out, fmt.Sprintf("Expected: %s, Actual: %s", test.output, out))
 	}
 }
@@ -185,7 +185,7 @@ func TestIsPlatformValid(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		isValid := cache.IsPlatformValid(test.platform)
+		isValid, _ := cache.IsPlatformValid(test.platform)
 		assert.Equal(t, test.isValid, isValid)
 	}
 }

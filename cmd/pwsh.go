@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,10 +16,14 @@ var pwshCmd = &cobra.Command{
   For more information on powershell profiles see 'Get-Help about_Profiles'
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenPowerShellCompletion(os.Stdout)
+		genPwshCompletion(os.Stdout)
 	},
 }
 
 func init() {
 	completionCmd.AddCommand(pwshCmd)
+}
+
+func genPwshCompletion(w io.Writer) {
+	rootCmd.GenPowerShellCompletion(w)
 }

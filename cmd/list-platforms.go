@@ -16,15 +16,13 @@ var listPlatformsCmd = &cobra.Command{
 	Use:   "list-platforms",
 	Short: "List available platforms.",
 	Long:  `List available platforms.`,
-	Run:   listPlatforms,
+	Run: func(cmd *cobra.Command, args []string) {
+		listAvailablePlatforms(os.Stdout, cache.DefaultSettings, args...)
+	},
 }
 
 func init() {
 	rootCmd.AddCommand(listPlatformsCmd)
-}
-
-func listPlatforms(cmd *cobra.Command, args []string) {
-	listAvailablePlatforms(os.Stdout, cache.DefaultSettings, args...)
 }
 
 func listAvailablePlatforms(writer io.Writer, settings cache.Cache, args ...string) {

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -19,10 +20,14 @@ var bashCmd = &cobra.Command{
   . <(tldr completion bash)
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenBashCompletion(os.Stdout)
+		genBashCompletion(os.Stdout)
 	},
 }
 
 func init() {
 	completionCmd.AddCommand(bashCmd)
+}
+
+func genBashCompletion(w io.Writer) {
+	rootCmd.GenBashCompletion(w)
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,10 +21,14 @@ var zshCmd = &cobra.Command{
   plugins=(git tldr)
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenZshCompletion(os.Stdout)
+		genZshCompletion(os.Stdout)
 	},
 }
 
 func init() {
 	completionCmd.AddCommand(zshCmd)
+}
+
+func genZshCompletion(w io.Writer) {
+	rootCmd.GenZshCompletion(w)
 }

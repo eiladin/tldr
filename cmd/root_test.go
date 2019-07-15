@@ -33,7 +33,7 @@ func TestFindPage(t *testing.T) {
 		{false, "linux", true, false, false, []string{}, []string{"linux"}},
 		{false, "linux", true, true, false, []string{}, []string{"\x1b"}},
 		{false, "linux", false, false, false, []string{"qwaszx"}, []string{"This page (qwaszx) does not exist yet!"}},
-		{false, "linux", false, false, true, []string{}, []string{"Clearing cache at " + settings.Location}},
+		{false, "linux", false, false, true, []string{}, []string{"Clearing cache ... Done\n"}},
 	}
 
 	for _, test := range tests {
