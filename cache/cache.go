@@ -49,9 +49,15 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 		if err = cache.createAndLoad(); err != nil {
 			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
 		}
-	} else if err != nil || info.ModTime().Before(time.Now().Add(-ttl)) {
-		if err = cache.Refresh(); err != nil {
-			return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
+	} else if err != nil {
+		return nil, fmt.Errorf("ERROR: creating cache: %s", err)
+	} else {
+		cacheExpired := info.ModTime().Before(time.Now().Add(-ttl))
+		children, _ := ioutil.ReadDir(cache.Location)
+		if cacheExpired || len(children) == 0 {
+			if err = cache.Refresh(); err != nil {
+				return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
+			}
 		}
 	}
 

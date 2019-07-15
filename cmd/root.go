@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	Use:     "tldr",
 	Short:   "Simplified and community-driven man pages",
 	Long:    `Simplified and community-driven man pages`,
-	Version: "1.3.1",
+	Version: "1.3.2",
 	Args:    ValidateArgs,
 	Run:     FindPage,
 }
