@@ -203,7 +203,6 @@ func (cache *Cache) loadFromRemote() error {
 	if err != nil {
 		return fmt.Errorf("ERROR: creating cache folder: %s", err)
 	}
-	defer dir.Close()
 
 	resp, err := http.Get(cache.Remote)
 	if resp.Body != nil {
@@ -220,6 +219,7 @@ func (cache *Cache) loadFromRemote() error {
 	if _, err = zip.Extract(cache.Location+zipPath, cache.Location); err != nil {
 		return fmt.Errorf("ERROR: extracting zip: %s", err)
 	}
+	dir.Close()
 
 	if err = os.Remove(cache.Location + zipPath); err != nil {
 		return fmt.Errorf("ERROR: removing zip file: %s", err)
