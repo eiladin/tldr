@@ -26,7 +26,7 @@ clean: ## Cleans up generated files/folders from the build.
 	/bin/rm -rfv "dist/" "${BINARY}"
 
 compress:
-	(which /usr/bin/upx > /dev/null && find dist/*/* | xargs -I{} -n1 -P 4 /usr/bin/upx --best "{}") || echo "not using upx for binary compression"
+	(which upx > /dev/null && find dist/*/* | xargs -I{} -n1 -P 4 upx --best "{}") || echo "not using upx for binary compression"
 
 build: fetch ## Builds the application.
 	go build -ldflags "${LD_FLAGS}" -i -v -o ${BINARY}
