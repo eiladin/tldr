@@ -77,7 +77,7 @@ func TestLoadFromRemote(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
-		os.RemoveAll(test.location)
+		cache.Purge()
 	}
 }
 
@@ -87,7 +87,7 @@ func TestCreateAndLoad(t *testing.T) {
 	cache := Cache{TTL: time.Minute, Location: location, Remote: remoteURL}
 	err := cache.createAndLoad()
 	assert.Error(t, err)
-	os.RemoveAll(location)
+	cache.Purge()
 }
 
 func TestCreateCacheFolder(t *testing.T) {
@@ -97,7 +97,7 @@ func TestCreateCacheFolder(t *testing.T) {
 	dir, err := os.Stat(location)
 	assert.NoError(t, err, "There should be no error getting the directory")
 	assert.Equal(t, true, dir.IsDir())
-	os.RemoveAll(dir.Name())
+	cache.Purge()
 }
 
 func TestFetchRandomPage(t *testing.T) {

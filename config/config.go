@@ -2,13 +2,14 @@ package config
 
 import (
 	"runtime"
+	"strings"
 )
 
-// OSName will return the corrected name of the current platform
-func OSName() (n string) {
-	n = runtime.GOOS
-	if n == "darwin" {
+// CurrentPlatform will return the corrected name of the current platform
+func CurrentPlatform() string {
+	n := runtime.GOOS
+	if strings.ToLower(n) == "darwin" {
 		n = "osx"
 	}
-	return
+	return strings.ToLower(n)
 }

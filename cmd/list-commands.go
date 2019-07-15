@@ -26,7 +26,7 @@ var listCommandsCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCommandsCmd)
-	listCommandsCmd.Flags().StringP("platform", "p", config.OSName(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
+	listCommandsCmd.Flags().StringP("platform", "p", config.CurrentPlatform(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
 }
 
 func listPlatformPages(writer io.Writer, settings cache.Cache, platform string, args ...string) {
