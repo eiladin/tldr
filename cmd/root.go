@@ -79,6 +79,31 @@ func FindPage(cmd *cobra.Command, args []string) {
 
 var logFatalf = log.Fatalf
 
+func findPage(w io.Writer, f flags, settings cache.Cache, args ...string) {
+	if f.purge {
+		purgeCache(w, settings)
+		return
+	}
+
+	cache := initCache(settings)
+
+	validatePlatform(cache, f.platform)
+
+	if f.update {
+		updateCache(w, cache)
+	}
+
+	if f.random {
+		printRandomPage(w, cache, f)
+	} else {
+		cmd := strings.Join(args, "-")
+		if f.update && cmd == "" {
+			return
+		}
+		printPage(w, cache, f, cmd)
+	}
+}
+
 func purgeCache(w io.Writer, settings cache.Cache) {
 	fmt.Fprintf(w, "Clearing cache ... ")
 	err := settings.Purge()
@@ -140,30 +165,5 @@ func printPage(w io.Writer, cache *cache.Cache, f flags, page string) {
 func write(c io.ReadCloser, w io.Writer, platform string, f flags) {
 	if err := page.Write(c, w, platform, f.color); err != nil {
 		logFatalf("ERROR: rendering page: %s", err)
-	}
-}
-
-func findPage(w io.Writer, f flags, settings cache.Cache, args ...string) {
-	if f.purge {
-		purgeCache(w, settings)
-		return
-	}
-
-	cache := initCache(settings)
-
-	validatePlatform(cache, f.platform)
-
-	if f.update {
-		updateCache(w, cache)
-	}
-
-	if f.random {
-		printRandomPage(w, cache, f)
-	} else {
-		cmd := strings.Join(args, "-")
-		if f.update && cmd == "" {
-			return
-		}
-		printPage(w, cache, f, cmd)
 	}
 }
