@@ -3,7 +3,7 @@ package cache
 import (
 	"fmt"
 	"os"
-	"os/user"
+	"path"
 	"testing"
 	"time"
 
@@ -126,12 +126,12 @@ func TestRefresh(t *testing.T) {
 }
 
 func TestGetCacheDir(t *testing.T) {
-	usr, _ := user.Current()
+	HOME := os.Getenv("HOME")
 	tests := []struct {
 		input  string
 		output string
 	}{
-		{"", usr.HomeDir + "/.tldr"},
+		{"", path.Join(HOME, ".tldr")},
 		{"test", "test"},
 	}
 	for _, test := range tests {

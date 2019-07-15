@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"os/user"
 	"path"
 	"path/filepath"
 	"strings"
@@ -223,14 +222,11 @@ func (cache *Cache) loadFromRemote() error {
 
 func getCacheDir(folder string) (string, error) {
 	if folder == "" {
-		usr, err := user.Current()
-		if err != nil {
-			return "", fmt.Errorf("ERROR: getting current user: %s", err)
+		HOME := os.Getenv("HOME")
+		if HOME != "" {
+			return path.Join(HOME, ".tldr"), nil
 		}
-		if usr.HomeDir == "" {
-			return "", fmt.Errorf("ERROR: loading current user's home directory")
-		}
-		return path.Join(usr.HomeDir, ".tldr"), nil
+		return "", fmt.Errorf("ERROR: getting current user's home directory: $HOME not set")
 	}
 	return folder, nil
 }
