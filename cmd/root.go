@@ -11,6 +11,7 @@ import (
 	"github.com/eiladin/tldr/cache"
 	"github.com/eiladin/tldr/config"
 	"github.com/eiladin/tldr/page"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -74,7 +75,7 @@ func FindPage(cmd *cobra.Command, args []string) {
 		color:    c,
 		purge:    pu,
 	}
-	findPage(os.Stdout, f, cache.DefaultSettings, args...)
+	findPage(color.Output, f, cache.DefaultSettings, args...)
 }
 
 var logFatalf = log.Fatalf

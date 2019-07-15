@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/eiladin/tldr/zip"
+	"github.com/mitchellh/go-homedir"
 )
 
 const (
@@ -228,11 +229,11 @@ func (cache *Cache) loadFromRemote() error {
 
 func getCacheDir(folder string) (string, error) {
 	if folder == "" {
-		HOME := os.Getenv("HOME")
-		if HOME != "" {
-			return path.Join(HOME, ".tldr"), nil
+		home, err := homedir.Dir()
+		if err != nil {
+			return "", fmt.Errorf("ERROR: getting current user's home directory: %s", err)
 		}
-		return "", fmt.Errorf("ERROR: getting current user's home directory: $HOME not set")
+		return path.Join(home, ".tldr"), nil
 	}
 	return folder, nil
 }
