@@ -21,7 +21,10 @@ var rootCmd = &cobra.Command{
 	Long:    `Simplified and community-driven man pages`,
 	Version: "1.3.2",
 	Args:    ValidateArgs,
-	Run:     FindPage,
+	Run: func(cmd *cobra.Command, args []string) {
+		f := createFlags(cmd)
+		findPage(color.Output, f, cache.DefaultSettings, args...)
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -60,22 +63,21 @@ type flags struct {
 	purge    bool
 }
 
-// FindPage will look up the page and display the simplified help for the user-provided command
-func FindPage(cmd *cobra.Command, args []string) {
+func createFlags(cmd *cobra.Command) flags {
 	u, _ := cmd.Flags().GetBool("update")
 	p, _ := cmd.Flags().GetString("platform")
 	r, _ := cmd.Flags().GetBool("random")
 	c, _ := cmd.Flags().GetBool("color")
 	pu, _ := cmd.Flags().GetBool("purge")
 
-	f := flags{
+	res := flags{
 		update:   u,
 		platform: p,
 		random:   r,
 		color:    c,
 		purge:    pu,
 	}
-	findPage(color.Output, f, cache.DefaultSettings, args...)
+	return res
 }
 
 var logFatalf = log.Fatalf

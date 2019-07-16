@@ -2,6 +2,7 @@ package zip
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"testing"
@@ -11,15 +12,40 @@ import (
 
 const remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
 
-func TestExtract(t *testing.T) {
-	const location = "./tldr-test"
-	os.Mkdir(location, 0755)
-	dir, _ := os.Create(location + "/tldr.zip")
+func downloadZip(location string) {
+	dir, _ := os.Create(location)
 	resp, err := http.Get(remoteURL)
-	assert.NoError(t, err, "Error downloading zip")
+	if err != nil {
+		log.Fatalf("ERROR: could not download zip")
+	}
 	defer resp.Body.Close()
 	io.Copy(dir, resp.Body)
-	files, _ := Extract(location+"/tldr.zip", location)
+}
+
+func TestExtract(t *testing.T) {
+	const location = "./tldr-zip-test"
+	os.Mkdir(location, 0755)
+	downloadZip(location + "/tldr.zip")
+	files, err := Extract(location+"/tldr.zip", location)
+	assert.NoError(t, err)
 	assert.NotEmpty(t, files, "zip should contain files")
 	os.RemoveAll(location)
+}
+
+func TestExtractNoSource(t *testing.T) {
+	const location = "./tldr-zip-nosource-test"
+	files, err := Extract(location+"/tldr.zip", location)
+	assert.Empty(t, files)
+	assert.Error(t, err)
+}
+
+func TestExtractDirExists(t *testing.T) {
+	const location = "./tldr-zip-bad-dir-test"
+	os.Mkdir(location, 0100)
+	downloadZip("./tldr.zip")
+	files, err := Extract("./tldr.zip", location)
+	assert.NotEmpty(t, files)
+	assert.Error(t, err)
+	os.RemoveAll(location)
+	os.RemoveAll("./tldr.zip")
 }

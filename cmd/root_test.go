@@ -9,6 +9,7 @@ import (
 
 	"github.com/eiladin/tldr/cache"
 	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,6 +17,86 @@ var settings = cache.Cache{
 	Remote:   "http://tldr-pages.github.com/assets/tldr.zip",
 	TTL:      time.Minute,
 	Location: "./tldr-cmd-test",
+}
+
+func getCobraCommand() *cobra.Command {
+	c := &cobra.Command{
+		Use: "test",
+		Run: func(cmd *cobra.Command, args []string) {},
+	}
+
+	c.Flags().BoolP("update", "u", false, "")
+	c.Flags().BoolP("random", "r", false, "")
+	c.Flags().BoolP("purge", "", false, "")
+	c.Flags().StringP("platform", "p", "linux", "")
+	c.Flags().BoolP("color", "c", false, "")
+	return c
+}
+
+func TestValidateArgs(t *testing.T) {
+	tests := []struct {
+		update    string
+		random    string
+		purge     string
+		args      []string
+		shouldErr bool
+	}{
+		{"false", "false", "false", []string{}, true},
+		{"true", "false", "false", []string{}, false},
+		{"false", "true", "false", []string{}, false},
+		{"false", "false", "true", []string{}, false},
+		{"false", "false", "false", []string{"arg1"}, false},
+	}
+
+	c := getCobraCommand()
+
+	for _, test := range tests {
+		c.Flag("update").Value.Set(test.update)
+		c.Flag("random").Value.Set(test.random)
+		c.Flag("purge").Value.Set(test.purge)
+		err := ValidateArgs(c, test.args)
+		if test.shouldErr {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+	}
+}
+
+func TestCreateFlags(t *testing.T) {
+	tests := []struct {
+		update   string
+		random   string
+		purge    string
+		platform string
+		color    string
+		flags    flags
+	}{
+		{"false", "false", "false", "linux", "false", flags{update: false, random: false, purge: false, platform: "linux", color: false}},
+		{"true", "false", "false", "linux", "false", flags{update: true, random: false, purge: false, platform: "linux", color: false}},
+		{"false", "true", "false", "linux", "false", flags{update: false, random: true, purge: false, platform: "linux", color: false}},
+		{"false", "false", "true", "linux", "false", flags{update: false, random: false, purge: true, platform: "linux", color: false}},
+		{"false", "false", "false", "osx", "false", flags{update: false, random: false, purge: false, platform: "osx", color: false}},
+		{"false", "false", "false", "linux", "true", flags{update: false, random: false, purge: false, platform: "linux", color: true}},
+	}
+
+	c := getCobraCommand()
+
+	for _, test := range tests {
+		c.Flag("update").Value.Set(test.update)
+		c.Flag("random").Value.Set(test.random)
+		c.Flag("purge").Value.Set(test.purge)
+		c.Flag("platform").Value.Set(test.platform)
+		c.Flag("color").Value.Set(test.color)
+
+		f := createFlags(c)
+		assert.Equal(t, test.flags.update, f.update, fmt.Sprintf("update flag expected %t, but got %t", test.flags.update, f.update))
+		assert.Equal(t, test.flags.random, f.random, fmt.Sprintf("random flag expected %t, but got %t", test.flags.random, f.random))
+		assert.Equal(t, test.flags.purge, f.purge, fmt.Sprintf("purge flag expected %t, but got %t", test.flags.purge, f.purge))
+		assert.Equal(t, test.flags.platform, f.platform, fmt.Sprintf("platform flag expected %s, but got %s", test.flags.platform, f.platform))
+		assert.Equal(t, test.flags.color, f.color, fmt.Sprintf("color flag expected %t, but got %t", test.flags.color, f.color))
+	}
+
 }
 
 func TestPurgeCache(t *testing.T) {
