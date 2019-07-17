@@ -111,7 +111,7 @@ func purgeCache(w io.Writer, settings cache.Cache) {
 	fmt.Fprintf(w, "Clearing cache ... ")
 	err := settings.Purge()
 	if err != nil {
-		logFatalf("ERROR: removing cache: %s", err)
+		logFatalf("ERROR: %s", err)
 	}
 	fmt.Fprintf(w, "Done\n")
 }
@@ -147,7 +147,7 @@ func formatPlatform(platform string, foundPlatform string) string {
 func printRandomPage(w io.Writer, cache *cache.Cache, f flags) {
 	c, foundPlatform, err := cache.FetchRandomPage(f.platform)
 	if err != nil {
-		logFatalf("ERROR: getting random page: %s", err)
+		logFatalf("ERROR: %s", err)
 	}
 	foundPlatform = formatPlatform(f.platform, foundPlatform)
 	defer c.Close()
