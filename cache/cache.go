@@ -2,7 +2,6 @@ package cache
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -15,12 +14,26 @@ import (
 
 	"github.com/eiladin/tldr/zip"
 	"github.com/mitchellh/go-homedir"
+	"golang.org/x/xerrors"
 )
 
 const (
 	zipPath        = "/tldr.zip"
 	pagesDirectory = "pages"
 	pageSuffix     = ".md"
+)
+
+var (
+	ErrCreatingCacheFolder = errors.New("unable to create cache folder")
+	ErrCreatingZip         = errors.New("unable to create zip")
+	ErrDownloadingFile     = errors.New("unable to download file")
+	ErrGettingCacheFolder  = errors.New("unable to get cache folder")
+	ErrGettingHomeDir      = errors.New("unable to get user's home")
+	ErrListingPages        = errors.New("unable to list pages")
+	ErrReadingPagesDir     = errors.New("unable to read pages folder")
+	ErrRemovingCacheFolder = errors.New("unable to remove cache folder")
+	ErrRemovingZip         = errors.New("unable to remove zip")
+	ErrSavingZipToCache    = errors.New("unable to save zip to cache")
 )
 
 // Cache stuct
@@ -40,7 +53,7 @@ var DefaultSettings = Cache{
 func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 	dir, err := getCacheDir(folder)
 	if err != nil {
-		return nil, fmt.Errorf("ERROR: getting cache directory: %s", err)
+		return nil, err
 	}
 
 	cache := &Cache{Location: dir, Remote: remote, TTL: ttl}
@@ -48,16 +61,16 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		if err = cache.createAndLoad(); err != nil {
-			return nil, fmt.Errorf("ERROR: creating cache: %s", err)
+			return nil, err
 		}
 	} else if err != nil {
-		return nil, fmt.Errorf("ERROR: creating cache: %s", err)
+		return nil, xerrors.Errorf("cache: %s: %w", err, ErrGettingCacheFolder)
 	} else {
 		cacheExpired := info.ModTime().Before(time.Now().Add(-ttl))
 		children, _ := ioutil.ReadDir(cache.Location)
 		if cacheExpired || len(children) == 0 {
 			if err = cache.Refresh(); err != nil {
-				return nil, fmt.Errorf("ERROR: refreshing cache: %s", err)
+				return nil, err
 			}
 		}
 	}
@@ -68,12 +81,9 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 // Refresh the cache with the latest info
 func (cache *Cache) Refresh() error {
 	if err := os.RemoveAll(cache.Location); err != nil {
-		return fmt.Errorf("ERROR: removing cache directory: %s", err)
+		return xerrors.Errorf("cache: %s: %w", err, ErrRemovingCacheFolder)
 	}
-	if err := cache.createAndLoad(); err != nil {
-		return fmt.Errorf("ERROR: creating cache directory: %s", err)
-	}
-	return nil
+	return cache.createAndLoad()
 }
 
 // FetchPage returns a specific page from cache
@@ -95,7 +105,7 @@ func (cache *Cache) FetchPage(platform, page string) (io.ReadCloser, string, err
 		}
 	}
 
-	return nil, "", errors.New("This page (" + page + ") does not exist yet!\n" +
+	return nil, "", xerrors.New("This page (" + page + ") does not exist yet!\n" +
 		"Submit new pages here: https://github.com/tldr-pages/tldr")
 }
 
@@ -136,7 +146,7 @@ func (cache *Cache) ListPages(platform string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("ERROR: getting pages list")
+		return nil, xerrors.Errorf("cache: %s: %w", err, ErrListingPages)
 	}
 
 	names := make([]string, len(pages))
@@ -152,7 +162,7 @@ func (cache *Cache) AvailablePlatforms() ([]string, error) {
 	var platforms []string
 	available, err := ioutil.ReadDir(path.Join(cache.Location, pagesDirectory))
 	if err != nil {
-		return nil, fmt.Errorf("ERROR: reading pages folder: %s", err)
+		return nil, xerrors.Errorf("cache: %s: %w", err, ErrReadingPagesDir)
 	}
 
 	for _, f := range available {
@@ -179,29 +189,37 @@ func (cache *Cache) IsPlatformValid(platform string) (bool, []string) {
 func (cache *Cache) Purge() error {
 	dir, err := getCacheDir(cache.Location)
 	if err != nil {
-		return fmt.Errorf("ERROR: getting cache folder: %s", err)
+		return err
 	}
-	return os.RemoveAll(dir)
+	err = os.RemoveAll(dir)
+	if err != nil {
+		return xerrors.Errorf("cache: %s: %w", err, ErrRemovingCacheFolder)
+	}
+	return nil
 }
 
 func (cache *Cache) createAndLoad() error {
 	if err := cache.createCacheFolder(); err != nil {
-		return fmt.Errorf("ERROR: creating cache directory: %s", err)
+		return err
 	}
 	if err := cache.loadFromRemote(); err != nil {
-		return fmt.Errorf("ERROR: loading data from remote: %s", err)
+		return err
 	}
 	return nil
 }
 
 func (cache *Cache) createCacheFolder() error {
-	return os.MkdirAll(cache.Location, 0755)
+	err := os.MkdirAll(cache.Location, 0755)
+	if err != nil {
+		return xerrors.Errorf("cache: %s: %w", err, ErrCreatingCacheFolder)
+	}
+	return nil
 }
 
 func (cache *Cache) loadFromRemote() error {
 	dir, err := os.Create(cache.Location + zipPath)
 	if err != nil {
-		return fmt.Errorf("ERROR: creating cache folder: %s", err)
+		return xerrors.Errorf("cache: %s: %w", err, ErrCreatingZip)
 	}
 
 	resp, err := http.Get(cache.Remote)
@@ -209,20 +227,20 @@ func (cache *Cache) loadFromRemote() error {
 		defer resp.Body.Close()
 	}
 	if err != nil || resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("ERROR: downloading zip: %s", err)
+		return xerrors.Errorf("cache: %q: %w", cache.Remote, ErrDownloadingFile)
 	}
 
 	if _, err = io.Copy(dir, resp.Body); err != nil {
-		return fmt.Errorf("ERROR: saving zip to cache: %s", err)
+		return xerrors.Errorf("cache: %s: %w", err, ErrSavingZipToCache)
 	}
 
 	if _, err = zip.Extract(cache.Location+zipPath, cache.Location); err != nil {
-		return fmt.Errorf("ERROR: extracting zip: %s", err)
+		return err
 	}
 	dir.Close()
 
 	if err = os.Remove(cache.Location + zipPath); err != nil {
-		return fmt.Errorf("ERROR: removing zip file: %s", err)
+		return xerrors.Errorf("cache: %s, %w", err, ErrRemovingZip)
 	}
 	return nil
 }
@@ -231,7 +249,7 @@ func getCacheDir(folder string) (string, error) {
 	if folder == "" {
 		home, err := homedir.Dir()
 		if err != nil {
-			return "", fmt.Errorf("ERROR: getting current user's home directory: %s", err)
+			return "", xerrors.Errorf("cache: %s: %w", err, ErrGettingHomeDir)
 		}
 		return path.Join(home, ".tldr"), nil
 	}

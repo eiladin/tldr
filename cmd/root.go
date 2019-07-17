@@ -119,7 +119,7 @@ func purgeCache(w io.Writer, settings cache.Cache) {
 func initCache(settings cache.Cache) *cache.Cache {
 	c, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
 	if err != nil {
-		logFatalf("ERROR: creating cache: %s", err)
+		logFatalf("ERROR: %s", err)
 	}
 	return c
 }

@@ -1,3 +1,4 @@
+//nolint:errcheck
 package cache
 
 import (
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/xerrors"
 )
 
 const (
@@ -47,9 +49,9 @@ func TestFetchPage(t *testing.T) {
 		{"sunos", "dmesg", "sunos"},
 	}
 	for _, test := range tests {
-		readCloser, pform, _ := cache.FetchPage(test.platform, test.page)
-		assert.Equal(t, test.outPlatform, pform, fmt.Sprintf("Platform should match: %s", test.outPlatform))
-		readCloser.Close()
+		rc, p, _ := cache.FetchPage(test.platform, test.page)
+		assert.Equal(t, test.outPlatform, p, fmt.Sprintf("Expected: %s, Got: %s", test.outPlatform, p))
+		rc.Close()
 	}
 
 	_, _, err := cache.FetchPage("linux", "qwaszx")
@@ -58,24 +60,24 @@ func TestFetchPage(t *testing.T) {
 
 func TestLoadFromRemote(t *testing.T) {
 	tests := []struct {
-		remote    string
-		location  string
-		fileMode  os.FileMode
-		shouldErr bool
+		remote   string
+		location string
+		fileMode os.FileMode
+		err      error
 	}{
-		{remoteURL, "./tldr-load", 0755, false},
-		{"https://github.com/eiladin/not-found.zip", "tldr-not-found", 0755, true},
-		{remoteURL, "./tldr-perm-error", 0100, true},
+		{remoteURL, "./tldr-load", 0755, nil},
+		{"https://github.com/eiladin/not-found.zip", "tldr-not-found", 0755, ErrDownloadingFile},
+		{remoteURL, "./tldr-perm-error", 0100, ErrCreatingZip},
 	}
 
 	for _, test := range tests {
 		os.Mkdir(test.location, test.fileMode)
 		cache := Cache{TTL: ttl, Location: test.location, Remote: test.remote}
 		err := cache.loadFromRemote()
-		if test.shouldErr {
-			assert.Error(t, err)
+		if test.err == nil {
+			assert.NoError(t, err, fmt.Sprintf("Expected no error, Got : %s", err))
 		} else {
-			assert.NoError(t, err)
+			assert.True(t, xerrors.Is(err, test.err), fmt.Sprintf("Expected: %s, Got: %s", test.err, err))
 		}
 		cache.Purge()
 	}
@@ -86,6 +88,7 @@ func TestCreateAndLoad(t *testing.T) {
 	os.Mkdir(location, 0100)
 	cache := Cache{TTL: time.Minute, Location: location, Remote: remoteURL}
 	err := cache.createAndLoad()
+	assert.True(t, xerrors.Is(err, ErrCreatingZip), fmt.Sprintf("Expected: %s, Got: %s", ErrCreatingZip, err))
 	assert.Error(t, err)
 	cache.Purge()
 }
@@ -135,7 +138,8 @@ func TestGetCacheDir(t *testing.T) {
 		{"test", "test"},
 	}
 	for _, test := range tests {
-		out, _ := getCacheDir(test.input)
+		out, err := getCacheDir(test.input)
+		fmt.Println(err)
 		assert.Equal(t, test.output, out, fmt.Sprintf("Expected: %s, Actual: %s", test.output, out))
 	}
 }
@@ -207,5 +211,6 @@ func TestPurge(t *testing.T) {
 		Location: location,
 		TTL:      time.Second,
 	}
-	purgeCache.Purge()
+	err := purgeCache.Purge()
+	assert.NoError(t, err, "Purge should not return an error")
 }
