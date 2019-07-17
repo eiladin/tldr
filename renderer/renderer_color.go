@@ -24,7 +24,7 @@ func colorize(str string, clr *color.Color) string {
 }
 
 func formatSyntaxLine(line string) string {
-	formattedLine := ""
+	formattedLine := "  "
 	line = strings.TrimSpace(line)
 	line = strings.Replace(line, "`", "", -1)
 	line = strings.Replace(line, "{{}}", "", -1)

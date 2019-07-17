@@ -28,11 +28,11 @@ func init() {
 func listAvailablePlatforms(writer io.Writer, settings cache.Cache, args ...string) {
 	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
 	if err != nil {
-		log.Fatalf("ERROR: Creating cache: %s", err)
+		log.Fatalf("ERROR: %s", err)
 	}
 	platforms, err := cache.AvailablePlatforms()
 	if err != nil {
-		log.Fatalf("ERROR: Getting platforms: %s", err)
+		log.Fatalf("ERROR: %s", err)
 	}
 	platformList := strings.Join(platforms, ", ")
 	fmt.Fprintf(writer, "Available Platforms: %s\n", platformList)

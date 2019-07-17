@@ -17,7 +17,7 @@ func downloadZip(location string) {
 	dir, _ := os.Create(location)
 	resp, err := http.Get(remoteURL)
 	if err != nil {
-		log.Fatalf("ERROR: could not download zip")
+		log.Fatalf("ERROR: %s", err)
 	}
 	defer resp.Body.Close()
 	io.Copy(dir, resp.Body) //nolint:errcheck

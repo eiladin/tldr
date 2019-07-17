@@ -32,7 +32,7 @@ func init() {
 func listPlatformPages(writer io.Writer, settings cache.Cache, platform string, args ...string) {
 	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
 	if err != nil {
-		log.Fatalf("ERROR: creating cache: %s", err)
+		log.Fatalf("ERROR: %s", err)
 	}
 	platformValid, availablePlatforms := cache.IsPlatformValid(platform)
 	if !platformValid {
@@ -40,7 +40,7 @@ func listPlatformPages(writer io.Writer, settings cache.Cache, platform string, 
 	}
 	pages, err := cache.ListPages(platform)
 	if err != nil {
-		log.Fatalf("ERROR: fetching pages for platform: %s", err)
+		log.Fatalf("ERROR: %s", err)
 	}
 	w := tabwriter.NewWriter(writer, 8, 8, 0, '\t', 0)
 	defer w.Flush()

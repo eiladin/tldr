@@ -31,5 +31,5 @@ func (renderer UnformattedRenderer) RenderExample(line string) string {
 // RenderSyntax returns unformatted example syntax
 func (renderer UnformattedRenderer) RenderSyntax(line string) string {
 	line = strings.Replace(line, "`", "", -1)
-	return fmt.Sprintln(line)
+	return fmt.Sprintf("  %s\n", line)
 }
