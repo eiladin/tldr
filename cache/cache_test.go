@@ -154,6 +154,7 @@ func TestListPages(t *testing.T) {
 		{"osx", []string{"dmesg", "brew"}},
 		{"sunos", []string{"dmesg", "stty"}},
 		{"windows", []string{"rmdir", "mkdir"}},
+		{"all", []string{"where", "choco", "brew"}},
 	}
 
 	for _, test := range tests {
