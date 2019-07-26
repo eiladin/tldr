@@ -36,7 +36,7 @@ func TestUnformattedRenderExample(t *testing.T) {
 
 func TestUnformattedRenderSyntax(t *testing.T) {
 	renderer := new(UnformattedRenderer)
-	expected := "Syntax {{example}}\n"
+	expected := "  Syntax {{example}}\n"
 	actual := renderer.RenderSyntax("Syntax {{example}}")
 	assert.Equal(t, expected, actual)
 }

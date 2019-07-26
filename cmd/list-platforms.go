@@ -34,6 +34,6 @@ func listAvailablePlatforms(writer io.Writer, settings cache.Cache, args ...stri
 		log.Fatalf("ERROR: %s", err)
 	}
 	for _, platform := range platforms {
-		fmt.Println(platform)
+		fmt.Fprintln(writer, platform)
 	}
 }

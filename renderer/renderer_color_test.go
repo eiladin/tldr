@@ -44,7 +44,7 @@ func TestColorRenderExample(t *testing.T) {
 
 func TestColorRenderSyntax(t *testing.T) {
 	renderer := new(ColorRenderer)
-	expected := "\x1b[37mSyntax \x1b[0m\x1b[3;94mexample\x1b[0m\x1b[37m\x1b[0m\n"
+	expected := "  \x1b[37mSyntax \x1b[0m\x1b[3;94mexample\x1b[0m\x1b[37m\x1b[0m\n"
 	actual := renderer.RenderSyntax("Syntax {{example}}")
 	assert.Equal(t, expected, actual)
 }
@@ -54,9 +54,9 @@ func TestFormatSyntaxLine(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"Syntax {{example}}", "\x1b[37mSyntax \x1b[0m\x1b[3;94mexample\x1b[0m\x1b[37m\x1b[0m\n"},
-		{"Syntax {{example}}{{2}}", "\x1b[37mSyntax \x1b[0m\x1b[3;94mexample2\x1b[0m\x1b[37m\x1b[0m\n"},
-		{"Empty {{}}", "\x1b[37mEmpty \x1b[0m\n"},
+		{"Syntax {{example}}", "  \x1b[37mSyntax \x1b[0m\x1b[3;94mexample\x1b[0m\x1b[37m\x1b[0m\n"},
+		{"Syntax {{example}}{{2}}", "  \x1b[37mSyntax \x1b[0m\x1b[3;94mexample2\x1b[0m\x1b[37m\x1b[0m\n"},
+		{"Empty {{}}", "  \x1b[37mEmpty \x1b[0m\n"},
 	}
 
 	for _, test := range tests {
