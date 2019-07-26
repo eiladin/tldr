@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/eiladin/tldr/cache"
 	"github.com/spf13/cobra"
@@ -34,6 +33,7 @@ func listAvailablePlatforms(writer io.Writer, settings cache.Cache, args ...stri
 	if err != nil {
 		log.Fatalf("ERROR: %s", err)
 	}
-	platformList := strings.Join(platforms, ", ")
-	fmt.Fprintf(writer, "Available Platforms: %s\n", platformList)
+	for _, platform := range platforms {
+		fmt.Println(platform)
+	}
 }

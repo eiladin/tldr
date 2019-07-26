@@ -44,10 +44,7 @@ func listPlatformPages(writer io.Writer, settings cache.Cache, platform string, 
 	}
 	w := tabwriter.NewWriter(writer, 8, 8, 0, '\t', 0)
 	defer w.Flush()
-	for i := 0; i < len(pages)-1; i += 2 {
-		fmt.Fprintf(w, "%s\t%s\n", pages[i], pages[i+1])
-	}
-	if len(pages)%2 > 0 {
-		fmt.Fprintf(w, "%s\n", pages[len(pages)-1])
+	for i := 0; i < len(pages)-1; i++ {
+		fmt.Fprintf(w, "%s\n", pages[i])
 	}
 }

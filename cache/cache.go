@@ -86,27 +86,50 @@ func (cache *Cache) Refresh() error {
 	return cache.createAndLoad()
 }
 
-// FetchPage returns a specific page from cache
-func (cache *Cache) FetchPage(platform, page string) (io.ReadCloser, string, error) {
-	pform := platform
-	platformPath := path.Join(cache.Location, pagesDirectory, platform, page+pageSuffix)
-	commonPath := path.Join(cache.Location, pagesDirectory, "common", page+pageSuffix)
+type platformPath struct {
+	Platform string
+	Path     string
+}
 
-	paths := []string{platformPath, commonPath}
-	for _, p := range paths {
-		if p == commonPath {
-			pform = "common"
-		}
-		if _, err := os.Stat(p); os.IsNotExist(err) {
+func (cache *Cache) makePath(platform string, page string) string {
+	return path.Join(cache.Location, pagesDirectory, platform, page+pageSuffix)
+}
+
+func (cache *Cache) getPage(platforms []string, page string) (string, string, error) {
+	ps := make([]platformPath, 0)
+	for _, p := range platforms {
+		ps = append(ps, platformPath{Platform: p, Path: cache.makePath(p, page)})
+	}
+
+	for _, pp := range ps {
+		if _, err := os.Stat(pp.Path); os.IsNotExist(err) {
 			continue
 		} else {
-			closer, err := os.Open(p)
-			return closer, pform, err
+			return pp.Platform, pp.Path, nil
 		}
 	}
 
-	return nil, "", xerrors.New("This page (" + page + ") does not exist yet!\n" +
-		"Submit new pages here: https://github.com/tldr-pages/tldr")
+	return "", "", xerrors.New("This page (" + page + ") does not exist yet!\n" +
+		"Submit new pages here: https://github.com/tldr-pages/tldr/issues/new?title=page%20request:%20" + page)
+}
+
+// FetchPage returns a specific page from cache
+func (cache *Cache) FetchPage(platform, page string) (io.ReadCloser, string, error) {
+	platforms := []string{platform, "common"}
+	p, f, err := cache.getPage(platforms, page)
+	if err != nil {
+		platforms, err = cache.AvailablePlatforms()
+		if err != nil {
+			return nil, "", err
+		}
+		p, f, err = cache.getPage(platforms, page)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+
+	closer, err := os.Open(f)
+	return closer, p, err
 }
 
 // FetchRandomPage returns a random page from cache
