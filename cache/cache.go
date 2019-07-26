@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -158,8 +159,7 @@ func (cache *Cache) FetchRandomPage(platform string) (io.ReadCloser, string, err
 	return reader, platform, err
 }
 
-// ListPages returns all pages for a given platform
-func (cache *Cache) ListPages(platform string) ([]string, error) {
+func (cache *Cache) getPages(platform string) ([]string, error) {
 	dir := path.Join(cache.Location, pagesDirectory, platform)
 	pages := []os.FileInfo{}
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
@@ -178,6 +178,43 @@ func (cache *Cache) ListPages(platform string) ([]string, error) {
 		names[i] = name[:len(name)-3]
 	}
 	return names, nil
+
+}
+
+func unique(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	r := []string{}
+	for _, s := range stringSlice {
+		if _, v := keys[s]; !v {
+			keys[s] = true
+			r = append(r, s)
+		}
+	}
+	return r
+}
+
+// ListPages returns all pages for a given platform
+func (cache *Cache) ListPages(platform string) ([]string, error) {
+	if strings.ToLower(platform) == "all" {
+		pgs := make([]string, 0)
+		pfs, err := cache.AvailablePlatforms()
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range pfs {
+			ppg, err := cache.getPages(p)
+			if err != nil {
+				return nil, err
+			}
+			for _, pg := range ppg {
+				pgs = append(pgs, pg)
+			}
+		}
+		pgs = unique(pgs)
+		sort.Strings(pgs)
+		return pgs, nil
+	}
+	return cache.getPages(platform)
 }
 
 // AvailablePlatforms returns all platforms available in the cache

@@ -34,9 +34,11 @@ func listPlatformPages(writer io.Writer, settings cache.Cache, platform string, 
 	if err != nil {
 		log.Fatalf("ERROR: %s", err)
 	}
-	platformValid, availablePlatforms := cache.IsPlatformValid(platform)
-	if !platformValid {
-		log.Fatalf("ERROR: platform %s not found\nAvailable platforms: %s", platform, strings.Join(availablePlatforms, ", "))
+	if strings.ToLower(platform) != "all" {
+		platformValid, availablePlatforms := cache.IsPlatformValid(platform)
+		if !platformValid {
+			log.Fatalf("ERROR: platform %s not found\nAvailable platforms: all, %s", platform, strings.Join(availablePlatforms, ", "))
+		}
 	}
 	pages, err := cache.ListPages(platform)
 	if err != nil {
