@@ -25,5 +25,8 @@ func init() {
 }
 
 func genPwshCompletion(w io.Writer) {
-	rootCmd.GenPowerShellCompletion(w)
+	err := rootCmd.GenPowerShellCompletion(w)
+	if err != nil {
+		logFatalf("ERROR: generating pwsh completion: %s", err)
+	}
 }

@@ -29,5 +29,8 @@ func init() {
 }
 
 func genBashCompletion(w io.Writer) {
-	rootCmd.GenBashCompletion(w)
+	err := rootCmd.GenBashCompletion(w)
+	if err != nil {
+		logFatalf("ERROR: generating bash completion: %s", err)
+	}
 }

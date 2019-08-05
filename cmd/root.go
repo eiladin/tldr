@@ -133,7 +133,10 @@ func validatePlatform(cache *cache.Cache, platform string) {
 
 func updateCache(w io.Writer, cache *cache.Cache) {
 	fmt.Fprint(w, "Refreshing Cache ... ")
-	cache.Refresh()
+	err := cache.Refresh()
+	if err != nil {
+		logFatalf("ERROR: unable to update cache, %s", err)
+	}
 	fmt.Fprintln(w, "Done")
 }
 

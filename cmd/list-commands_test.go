@@ -40,5 +40,5 @@ func TestPlatformListPages(t *testing.T) {
 		}
 	}
 
-	settings.Purge()
+	settings.Purge() // nolint: errcheck
 }

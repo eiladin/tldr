@@ -51,9 +51,9 @@ func TestValidateArgs(t *testing.T) {
 	c := getCobraCommand()
 
 	for _, test := range tests {
-		c.Flag("update").Value.Set(test.update)
-		c.Flag("random").Value.Set(test.random)
-		c.Flag("purge").Value.Set(test.purge)
+		c.Flag("update").Value.Set(test.update) // nolint: errcheck
+		c.Flag("random").Value.Set(test.random) // nolint: errcheck
+		c.Flag("purge").Value.Set(test.purge)   // nolint: errcheck
 		err := ValidateArgs(c, test.args)
 		if test.shouldErr {
 			assert.Error(t, err)
@@ -83,11 +83,11 @@ func TestCreateFlags(t *testing.T) {
 	c := getCobraCommand()
 
 	for _, test := range tests {
-		c.Flag("update").Value.Set(test.update)
-		c.Flag("random").Value.Set(test.random)
-		c.Flag("purge").Value.Set(test.purge)
-		c.Flag("platform").Value.Set(test.platform)
-		c.Flag("color").Value.Set(test.color)
+		c.Flag("update").Value.Set(test.update)     // nolint: errcheck
+		c.Flag("random").Value.Set(test.random)     // nolint: errcheck
+		c.Flag("purge").Value.Set(test.purge)       // nolint: errcheck
+		c.Flag("platform").Value.Set(test.platform) // nolint: errcheck
+		c.Flag("color").Value.Set(test.color)       // nolint: errcheck
 
 		f := createFlags(c)
 		assert.Equal(t, test.flags.update, f.update, fmt.Sprintf("update flag expected %t, but got %t", test.flags.update, f.update))
@@ -101,7 +101,7 @@ func TestCreateFlags(t *testing.T) {
 
 func TestPurgeCache(t *testing.T) {
 	settings.Location = "./tldr-purge-test"
-	os.Mkdir(settings.Location, 0755)
+	os.Mkdir(settings.Location, 0755) // nolint: errcheck
 	var b bytes.Buffer
 	purgeCache(&b, settings)
 	assert.Equal(t, "Clearing cache ... Done\n", b.String())

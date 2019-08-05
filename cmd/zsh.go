@@ -30,5 +30,8 @@ func init() {
 }
 
 func genZshCompletion(w io.Writer) {
-	rootCmd.GenZshCompletion(w)
+	err := rootCmd.GenZshCompletion(w)
+	if err != nil {
+		logFatalf("ERROR: generating zsh completion: %s", err)
+	}
 }
