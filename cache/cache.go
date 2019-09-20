@@ -2,6 +2,7 @@ package cache
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -51,7 +52,7 @@ var DefaultSettings = Cache{
 }
 
 // Create a new Cache and populate it
-func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
+func Create(w io.Writer, remote string, ttl time.Duration, folder string) (*Cache, error) {
 	dir, err := getCacheDir(folder)
 	if err != nil {
 		return nil, err
@@ -70,9 +71,11 @@ func Create(remote string, ttl time.Duration, folder string) (*Cache, error) {
 		cacheExpired := info.ModTime().Before(time.Now().Add(-ttl))
 		children, _ := ioutil.ReadDir(cache.Location)
 		if cacheExpired || len(children) == 0 {
+			fmt.Fprint(w, "Cache Expired - Refreshing ... ")
 			if err = cache.Refresh(); err != nil {
 				return nil, err
 			}
+			fmt.Fprintln(w, "Done")
 		}
 	}
 

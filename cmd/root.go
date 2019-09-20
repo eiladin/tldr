@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Use:     "tldr",
 	Short:   "Simplified and community-driven man pages",
 	Long:    `Simplified and community-driven man pages`,
-	Version: "1.3.10",
+	Version: "1.3.11",
 	Args:    ValidateArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		f := createFlags(cmd)
@@ -88,7 +88,7 @@ func findPage(w io.Writer, f flags, settings cache.Cache, args ...string) {
 		return
 	}
 
-	cache := initCache(settings)
+	cache := initCache(w, settings)
 
 	validatePlatform(cache, f.platform)
 
@@ -116,8 +116,8 @@ func purgeCache(w io.Writer, settings cache.Cache) {
 	fmt.Fprintf(w, "Done\n")
 }
 
-func initCache(settings cache.Cache) *cache.Cache {
-	c, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
+func initCache(w io.Writer, settings cache.Cache) *cache.Cache {
+	c, err := cache.Create(w, settings.Remote, settings.TTL, settings.Location)
 	if err != nil {
 		logFatalf("ERROR: %s", err)
 	}

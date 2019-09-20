@@ -30,7 +30,7 @@ func init() {
 }
 
 func listPlatformPages(writer io.Writer, settings cache.Cache, platform string, args ...string) {
-	cache, err := cache.Create(settings.Remote, settings.TTL, settings.Location)
+	cache, err := cache.Create(writer, settings.Remote, settings.TTL, settings.Location)
 	if err != nil {
 		log.Fatalf("ERROR: %s", err)
 	}

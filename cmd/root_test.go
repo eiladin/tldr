@@ -113,7 +113,8 @@ func TestPurgeCache(t *testing.T) {
 
 func TestInitCache(t *testing.T) {
 	settings.Location = "./tldr-init-test"
-	c := initCache(settings)
+	var b bytes.Buffer
+	c := initCache(&b, settings)
 	assert.NotNil(t, c)
 	f, err := os.Stat(settings.Location)
 	assert.NotNil(t, f)
@@ -135,7 +136,8 @@ func TestValidatePlatform(t *testing.T) {
 	}
 
 	settings.Location = "./tldr-validate-platform-test"
-	c := initCache(settings)
+	var b bytes.Buffer
+	c := initCache(&b, settings)
 	origLogFatalf := logFatalf
 	defer func() { logFatalf = origLogFatalf }()
 	errors := []string{}
@@ -194,7 +196,8 @@ func TestPrintRandomPage(t *testing.T) {
 	}
 
 	settings.Location = "./tldr-random-page-test"
-	cache := initCache(settings)
+	var b bytes.Buffer
+	cache := initCache(&b, settings)
 
 	for _, test := range tests {
 		var b bytes.Buffer
@@ -218,7 +221,8 @@ func TestPrintPage(t *testing.T) {
 	}
 
 	settings.Location = "./tldr-print-page-test"
-	cache := initCache(settings)
+	var b bytes.Buffer
+	cache := initCache(&b, settings)
 
 	for _, test := range tests {
 		var b bytes.Buffer

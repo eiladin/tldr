@@ -2,6 +2,7 @@
 package cache
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path"
@@ -21,7 +22,8 @@ const (
 var cache *Cache
 
 func CreateCache() *Cache {
-	cache, _ = Create(remoteURL, ttl, location)
+	var b bytes.Buffer
+	cache, _ = Create(&b, remoteURL, ttl, location)
 	return cache
 }
 
@@ -197,9 +199,10 @@ func TestIsPlatformValid(t *testing.T) {
 
 func TestCacheInvalidation(t *testing.T) {
 	location := "./test-cache-invalidation"
-	Create(remoteURL, time.Millisecond, location)
+	var b bytes.Buffer
+	Create(&b, remoteURL, time.Millisecond, location)
 	now := time.Now()
-	Create(remoteURL, time.Millisecond, location)
+	Create(&b, remoteURL, time.Millisecond, location)
 	info, _ := os.Stat(location)
 	assert.True(t, info.ModTime().After(now))
 	os.RemoveAll(location)
