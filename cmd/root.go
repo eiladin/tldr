@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Use:     "tldr",
 	Short:   "Simplified and community-driven man pages",
 	Long:    `Simplified and community-driven man pages`,
-	Version: "1.3.9",
+	Version: "1.3.10",
 	Args:    ValidateArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		f := createFlags(cmd)
