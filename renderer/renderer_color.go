@@ -10,10 +10,10 @@ import (
 var (
 	titleText         = color.New(color.Bold, color.FgWhite)
 	platformText      = color.New(color.FgHiBlack)
-	tagText           = color.New(color.Italic, color.FgHiBlue)
-	descriptionText   = color.New(color.FgHiYellow)
+	tagText           = color.New(color.FgWhite)
+	descriptionText   = color.New(color.FgWhite)
 	exampleHeaderText = color.New(color.FgHiGreen)
-	exampleText       = color.New(color.FgWhite)
+	exampleText       = color.New(color.FgHiRed)
 )
 
 // ColorRenderer implements Renderer and prints with color and formatting
