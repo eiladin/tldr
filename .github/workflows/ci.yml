@@ -29,12 +29,3 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Release
-      uses: goreleaser/goreleaser-action@v2.1.1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        version: latest
-        args: release --snapshot --skip-validate --skip-publish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
