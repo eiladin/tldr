@@ -2,6 +2,7 @@ package renderer
 
 // PageRenderer is an interface for rendering the output of a page
 type PageRenderer interface {
+	Init()
 	RenderTitle(string) string
 	RenderPlatform(string) string
 	RenderDescription(string) string

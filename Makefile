@@ -2,6 +2,7 @@
 
 GOPATH := $(shell go env | grep GOPATH | sed 's/GOPATH="\(.*\)"/\1/')
 PATH := $(GOPATH)/bin:$(PATH)
+TEST_DESTS := $(dir $(wildcard ./*/*_test.go))
 export $(PATH)
 
 BINARY=tldr
@@ -30,3 +31,6 @@ compress:
 
 build: fetch ## Builds the application.
 	go build -ldflags "${LD_FLAGS}" -i -v -o ${BINARY}
+
+test: ## Run unit tests
+	go test ./...

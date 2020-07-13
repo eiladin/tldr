@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/eiladin/tldr/cache"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -186,7 +185,6 @@ func TestFormatPlatform(t *testing.T) {
 }
 
 func TestPrintRandomPage(t *testing.T) {
-	color.NoColor = false
 	tests := []struct {
 		f        flags
 		expected string
@@ -209,14 +207,13 @@ func TestPrintRandomPage(t *testing.T) {
 }
 
 func TestPrintPage(t *testing.T) {
-	color.NoColor = false
 	tests := []struct {
 		f        flags
 		page     string
 		expected []string
 	}{
 		{flags{false, "linux", false, true, false}, "git-pull", []string{"\x1b", "git-pull"}},
-		{flags{false, "linux", false, false, false}, "git-pull", []string{"{{branch}}", "git-pull"}},
+		{flags{false, "linux", false, false, false}, "git-pull", []string{"branch", "git-pull"}},
 		{flags{false, "linux", false, false, false}, "not-found", []string{"This page (not-found) does not exist yet!"}},
 	}
 
@@ -236,7 +233,6 @@ func TestPrintPage(t *testing.T) {
 }
 
 func TestFindPage(t *testing.T) {
-	color.NoColor = false
 	settings.Location = "./tldr-root-cmd-test"
 
 	tests := []struct {

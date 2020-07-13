@@ -4,23 +4,44 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/logrusorgru/aurora"
 )
 
 var (
-	titleText         = color.New(color.Bold, color.FgWhite)
-	platformText      = color.New(color.FgHiBlack)
-	tagText           = color.New(color.FgWhite)
-	descriptionText   = color.New(color.FgWhite)
-	exampleHeaderText = color.New(color.FgHiGreen)
-	exampleText       = color.New(color.FgHiRed)
+	au = aurora.NewAurora(false)
 )
 
-// ColorRenderer implements Renderer and prints with color and formatting
-type ColorRenderer struct{}
+func titleText(arg interface{}) aurora.Value {
+	return au.White(arg)
+}
 
-func colorize(str string, clr *color.Color) string {
-	return clr.Sprint(str)
+func platformText(arg interface{}) aurora.Value {
+	return au.BrightBlack(arg)
+}
+
+func tagText(arg interface{}) aurora.Value {
+	return au.White(arg)
+}
+
+func descriptionText(arg interface{}) aurora.Value {
+	return au.White(arg)
+}
+
+func exampleHeaderText(arg interface{}) aurora.Value {
+	return au.Green(arg)
+}
+
+func exampleText(arg interface{}) aurora.Value {
+	return au.Red(arg)
+}
+
+// ColorRenderer implements Renderer and prints with color and formatting
+type ColorRenderer struct {
+	UseColor bool
+}
+
+func (renderer ColorRenderer) Init() {
+	au = aurora.NewAurora(renderer.UseColor)
 }
 
 func formatSyntaxLine(line string) string {
@@ -34,9 +55,9 @@ func formatSyntaxLine(line string) string {
 	for _, segment := range strings.Split(line, "{{") {
 		for _, piece := range strings.Split(segment, "}}") {
 			if inTag {
-				formattedLine += colorize(piece, tagText)
+				formattedLine += fmt.Sprint(tagText(piece))
 			} else {
-				formattedLine += colorize(piece, exampleText)
+				formattedLine += fmt.Sprint(exampleText(piece))
 			}
 			inTag = !inTag
 		}
@@ -47,22 +68,22 @@ func formatSyntaxLine(line string) string {
 
 // RenderTitle returns a formatted title
 func (renderer ColorRenderer) RenderTitle(line string) string {
-	return fmt.Sprintln(colorize(line, titleText))
+	return fmt.Sprintln(aurora.Bold(titleText(line)))
 }
 
 // RenderPlatform returns a formatted platform
 func (renderer ColorRenderer) RenderPlatform(line string) string {
-	return fmt.Sprintln(colorize(line, platformText))
+	return fmt.Sprintln(platformText(line))
 }
 
 // RenderDescription returns a formatted description
 func (renderer ColorRenderer) RenderDescription(line string) string {
-	return fmt.Sprintln(colorize(line, descriptionText))
+	return fmt.Sprintln(descriptionText(line))
 }
 
 // RenderExample returns a formatted example header
 func (renderer ColorRenderer) RenderExample(line string) string {
-	return fmt.Sprintln(colorize(line, exampleHeaderText))
+	return fmt.Sprintln(exampleHeaderText(line))
 }
 
 // RenderSyntax returns formatted example syntax

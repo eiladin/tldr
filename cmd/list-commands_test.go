@@ -6,12 +6,10 @@ import (
 	"time"
 
 	"github.com/eiladin/tldr/cache"
-	"github.com/fatih/color"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPlatformListPages(t *testing.T) {
-	color.NoColor = false
 
 	settings := cache.Cache{
 		Remote:   "http://tldr-pages.github.com/assets/tldr.zip",

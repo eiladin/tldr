@@ -10,6 +10,7 @@ import (
 )
 
 func render(markdown io.Reader, dest io.Writer, platform string, r renderer.PageRenderer) error {
+	r.Init()
 	scanner := bufio.NewScanner(markdown)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -33,8 +34,8 @@ func render(markdown io.Reader, dest io.Writer, platform string, r renderer.Page
 
 // Write the contents of markdown to dest
 func Write(markdown io.Reader, dest io.Writer, platform string, color bool) error {
-	if color {
-		return render(markdown, dest, platform, new(renderer.ColorRenderer))
+	r := renderer.ColorRenderer{
+		UseColor: color,
 	}
-	return render(markdown, dest, platform, new(renderer.UnformattedRenderer))
+	return render(markdown, dest, platform, r)
 }

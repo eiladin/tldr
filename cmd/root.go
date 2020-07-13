@@ -11,7 +11,6 @@ import (
 	"github.com/eiladin/tldr/cache"
 	"github.com/eiladin/tldr/config"
 	"github.com/eiladin/tldr/page"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +22,7 @@ var rootCmd = &cobra.Command{
 	Args:    ValidateArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		f := createFlags(cmd)
-		findPage(color.Output, f, cache.DefaultSettings, args...)
+		findPage(os.Stdout, f, cache.DefaultSettings, args...)
 	},
 }
 
