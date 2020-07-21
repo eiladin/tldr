@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eiladin/tldr/cache"
+	"github.com/eiladin/tldr/internal/cache"
 	"github.com/stretchr/testify/assert"
 )
 

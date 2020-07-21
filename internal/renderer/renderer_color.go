@@ -12,7 +12,7 @@ var (
 )
 
 func titleText(arg interface{}) aurora.Value {
-	return au.White(arg)
+	return au.Bold(au.White(arg))
 }
 
 func platformText(arg interface{}) aurora.Value {
@@ -32,7 +32,7 @@ func exampleHeaderText(arg interface{}) aurora.Value {
 }
 
 func exampleText(arg interface{}) aurora.Value {
-	return au.Red(arg)
+	return au.Blue(arg)
 }
 
 // ColorRenderer implements Renderer and prints with color and formatting
@@ -68,7 +68,7 @@ func formatSyntaxLine(line string) string {
 
 // RenderTitle returns a formatted title
 func (renderer ColorRenderer) RenderTitle(line string) string {
-	return fmt.Sprintln(aurora.Bold(titleText(line)))
+	return fmt.Sprintln(titleText(line))
 }
 
 // RenderPlatform returns a formatted platform

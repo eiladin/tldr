@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eiladin/tldr/zip"
+	"github.com/eiladin/tldr/internal/zip"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/xerrors"
 )

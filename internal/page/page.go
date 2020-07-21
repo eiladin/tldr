@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/eiladin/tldr/renderer"
+	"github.com/eiladin/tldr/internal/renderer"
 )
 
 func render(markdown io.Reader, dest io.Writer, platform string, r renderer.PageRenderer) error {
