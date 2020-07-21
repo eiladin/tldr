@@ -22,9 +22,4 @@ jobs:
         go-version: 1.14
 
     - name: Run test
-      uses: goreleaser/goreleaser-action@v2.1.1
-      with:
-        version: latest
-        args: release --snapshot
-      env:
-        GITHUB_TOKEN: ${{ secrets.INTEGRATION_TOKEN }}
+      run: go test ./...
