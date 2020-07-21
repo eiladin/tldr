@@ -1,15 +1,14 @@
-<p align="center">
+<div align="center">
   
-  <h3 align="center">TLDR</h3>
+  <h1 align="center">TLDR</h1>
 
-  <p align="center">
-    <a href="https://github.com/eiladin/tldr/actions?query=workflow%3Abuild"><img alt="Build" src="https://github.com/eiladin/tldr/workflows/build/badge.svg"></a>
-    <a href="https://github.com/eiladin/tldr/actions?query=workflow%3Atest"><img alt="Test" src="https://github.com/eiladin/tldr/workflows/test/badge.svg"></a>
-    <a href="https://github.com/eiladin/tldr/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/eiladin/tldr"></a>
-    <a href="https://github.com/eiladin/tldr/releases/latest"><img alt="Downloads" src="https://img.shields.io/github/downloads/eiladin/tldr/total?color=orange"></a>
-    <a href="https://github.com/eiladin/tldr/tree/checkout-tfe-support"><img alt="Latest Commit" src="https://img.shields.io/github/last-commit/eiladin/tldr?color=ff69b4"></a>
-  </p>
-</p>
+  ![build](https://github.com/eiladin/tldr/workflows/build/badge.svg)
+  ![test](https://github.com/eiladin/tldr/workflows/test/badge.svg)
+  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eiladin/tldr)
+  ![GitHub All Releases](https://img.shields.io/github/downloads/eiladin/tldr/total?color=orange&style=flat)
+  ![GitHub last commit](https://img.shields.io/github/last-commit/eiladin/tldr?color=%23ff69b4)
+  ![GitHub](https://img.shields.io/github/license/eiladin/tldr?color=blue)
+</div>
 
 ---
 
