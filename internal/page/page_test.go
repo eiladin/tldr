@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/eiladin/tldr/renderer"
+	"github.com/eiladin/tldr/internal/renderer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,9 +69,9 @@ func TestWrite(t *testing.T) {
 	}{
 		{"# Title", "linux", true, "\x1b[1;37mTitle\x1b[0m\n\x1b[90mlinux\x1b[0m\n"},
 		{"> Description", "linux", true, "\x1b[37mDescription\x1b[0m\n"},
-		{"- Example Header", "linux", true, "\x1b[92m- Example Header\x1b[0m\n  \x1b[91m\x1b[0m\n"},
+		{"- Example Header", "linux", true, "\x1b[32m- Example Header\x1b[0m\n  \x1b[34m\x1b[0m\n"},
 		{"normal line", "linux", true, "normal line\n"},
-		{"- Header\n\n`test {{tag}}`", "linux", true, "\x1b[92m- Header\x1b[0m\n  \x1b[91mtest \x1b[0m\x1b[37mtag\x1b[0m\x1b[91m\x1b[0m\n"},
+		{"- Header\n\n`test {{tag}}`", "linux", true, "\x1b[32m- Header\x1b[0m\n  \x1b[34mtest \x1b[0m\x1b[37mtag\x1b[0m\x1b[34m\x1b[0m\n"},
 		{"# Title", "linux", false, "Title\nlinux\n"},
 		{"> Description", "linux", false, "Description\n"},
 		{"- Example Header", "linux", false, "- Example Header\n  \n"},

@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/eiladin/tldr/cache"
-	"github.com/eiladin/tldr/config"
-	"github.com/eiladin/tldr/page"
+	"github.com/eiladin/tldr/internal/cache"
+	"github.com/eiladin/tldr/internal/config"
+	"github.com/eiladin/tldr/internal/page"
 	"github.com/spf13/cobra"
 )
 

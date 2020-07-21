@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/eiladin/tldr/cache"
+	"github.com/eiladin/tldr/internal/cache"
 	"github.com/spf13/cobra"
 )
 
