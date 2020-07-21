@@ -2,12 +2,25 @@
   
   <h1 align="center">TLDR</h1>
 
-  ![build](https://github.com/eiladin/tldr/workflows/build/badge.svg)
-  ![test](https://github.com/eiladin/tldr/workflows/test/badge.svg)
-  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eiladin/tldr)
-  ![GitHub All Releases](https://img.shields.io/github/downloads/eiladin/tldr/total?color=orange&style=flat)
-  ![GitHub last commit](https://img.shields.io/github/last-commit/eiladin/tldr?color=%23ff69b4)
-  ![GitHub](https://img.shields.io/github/license/eiladin/tldr?color=blue)
+  [![build][build-image]][build-url]
+  [![test][test-image]][test-url]
+  [![Release][release-image]][release-url]
+  [![Downloads][download-image]][download-url]
+  [![Last Commit][last-commit-image]][last-commit-url]
+  [![License][license-image]][license-url]
+  
+  [build-image]: https://github.com/eiladin/tldr/workflows/build/badge.svg
+  [build-url]: https://github.com/eiladin/tldr/actions?query=workflow%3Abuild
+  [test-image]: https://github.com/eiladin/tldr/workflows/test/badge.svg
+  [test-url]: https://github.com/eiladin/tldr/actions?query=workflow%3Atest
+  [release-image]: https://img.shields.io/github/v/release/eiladin/tldr
+  [release-url]: https://github.com/eiladin/tldr/releases
+  [download-image]: https://img.shields.io/github/downloads/eiladin/tldr/total?color=orange
+  [download-url]: https://github.com/eiladin/tldr/releases
+  [last-commit-image]: https://img.shields.io/github/last-commit/eiladin/tldr?color=%23ff69b4
+  [last-commit-url]: https://github.com/eiladin/tldr/commits/master
+  [license-image]: https://img.shields.io/github/license/eiladin/tldr?color=blue
+  [license-url]: https://github.com/eiladin/tldr/blob/master/LICENSE
 </div>
 
 ---
