@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -32,6 +33,6 @@ func init() {
 func genZshCompletion(w io.Writer) {
 	err := rootCmd.GenZshCompletion(w)
 	if err != nil {
-		logFatalf("ERROR: generating zsh completion: %s", err)
+		log.Fatalf("ERROR: generating zsh completion: %s", err)
 	}
 }

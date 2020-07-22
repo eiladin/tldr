@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -27,6 +28,6 @@ func init() {
 func genPwshCompletion(w io.Writer) {
 	err := rootCmd.GenPowerShellCompletion(w)
 	if err != nil {
-		logFatalf("ERROR: generating pwsh completion: %s", err)
+		log.Fatalf("ERROR: generating pwsh completion: %s", err)
 	}
 }

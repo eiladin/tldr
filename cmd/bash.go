@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -31,6 +32,6 @@ func init() {
 func genBashCompletion(w io.Writer) {
 	err := rootCmd.GenBashCompletion(w)
 	if err != nil {
-		logFatalf("ERROR: generating bash completion: %s", err)
+		log.Fatalf("ERROR: generating bash completion: %s", err)
 	}
 }
