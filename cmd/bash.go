@@ -2,36 +2,38 @@ package cmd
 
 import (
 	"io"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// bashCmd represents the bash command
-var bashCmd = &cobra.Command{
-	Use:   "bash",
-	Short: "Generates bash completion scripts",
-	Long: `To load completion run:
-  . <(tldr completion)
-  
-  To configure your bash shell to load completions for each session add to your bashrc
-  
-  # ~/.bashrc or ~/.profile
-  . <(tldr completion bash)
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		genBashCompletion(os.Stdout)
-	},
+type bashCmd struct {
+	cmd *cobra.Command
 }
 
-func init() {
-	completionCmd.AddCommand(bashCmd)
-}
-
-func genBashCompletion(w io.Writer) {
-	err := rootCmd.GenBashCompletion(w)
-	if err != nil {
-		log.Fatalf("ERROR: generating bash completion: %s", err)
+func newBashCmd() *bashCmd {
+	c := &bashCmd{}
+	cmd := &cobra.Command{
+		Use:   "bash",
+		Short: "Generates bash completion scripts",
+		Long: `To load completion run:
+		$ source <(tldr completion)
+		
+		To configure your bash shell to load completions for each session add to your bashrc
+		
+		# ~/.bashrc or ~/.profile
+		source <(tldr completion bash)
+		`,
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		Run: func(cmd *cobra.Command, args []string) {
+			genBashCompletion(cmd, os.Stdout)
+		},
 	}
+	c.cmd = cmd
+	return c
+}
+
+func genBashCompletion(cmd *cobra.Command, w io.Writer) {
+	cmd.Root().GenBashCompletion(w)
 }

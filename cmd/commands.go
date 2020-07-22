@@ -9,26 +9,43 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var listCommandsCmd = &cobra.Command{
-	Use:   "commands",
-	Short: "list all commands for the selected platform.",
-	Long:  `list all commands for the selected platform.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		_, err := listCommands(args...)
-		if err != nil {
-			log.Fatalf(err.Error())
-		}
-	},
+type commandsCmd struct {
+	cmd  *cobra.Command
+	opts commandsOptions
 }
 
-func init() {
-	rootCmd.AddCommand(listCommandsCmd)
-	listCommandsCmd.Flags().StringVarP(&opts.platform, "platform", "p", config.CurrentPlatform(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
+type commandsOptions struct {
+	platform string
 }
 
-func listCommands(args ...string) (*context.Context, error) {
+func newCommandsCmd() *commandsCmd {
+	var c = &commandsCmd{}
+	var cmd = &cobra.Command{
+		Use:           "commands",
+		Short:         "list all commands for the selected platform.",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			_, err := listCommands(c.opts, args...)
+			if err != nil {
+				log.Fatalf(err.Error())
+			}
+		},
+	}
+
+	cmd.Flags().StringVarP(&c.opts.platform, "platform", "p", config.CurrentPlatform(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
+	c.cmd = cmd
+	return c
+}
+
+func listCommands(options commandsOptions, args ...string) (*context.Context, error) {
 	ctx := context.New()
-	setupContext(ctx, args...)
-	ctx.Operation = context.OperationListCommands
+	setupCommandContext(ctx, options)
 	return pipeline.Execute(ctx, pipeline.ListCommandsPipeline)
+}
+
+func setupCommandContext(ctx *context.Context, options commandsOptions) *context.Context {
+	ctx.Operation = context.OperationListCommands
+	ctx.Platform = options.platform
+	return ctx
 }

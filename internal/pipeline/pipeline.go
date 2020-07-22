@@ -55,6 +55,5 @@ var ListPlatformsPipeline = []Piper{
 	purgeCache.Pipe{},
 	initCache.Pipe{},
 	platforms.Pipe{},
-	validatePlatform.Pipe{},
 	listPlatforms.Pipe{},
 }
