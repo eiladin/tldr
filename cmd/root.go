@@ -21,8 +21,8 @@ type options struct {
 	purge    bool
 }
 
-func Execute(args []string) {
-	newRootCmd().Execute(args)
+func Execute(version string, args []string) {
+	newRootCmd(version).Execute(args)
 }
 
 func (cmd *rootCmd) Execute(args []string) {
@@ -40,14 +40,14 @@ type rootCmd struct {
 	opts  options
 }
 
-func newRootCmd() *rootCmd {
+func newRootCmd(version string) *rootCmd {
 	var root = &rootCmd{}
 	var cmd = &cobra.Command{
 		Use:           "tldr",
 		Short:         "Simplified and community-driven man pages",
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Version:       "1.3.11",
+		Version:       version,
 		Args: func(cmd *cobra.Command, args []string) error {
 			return validateArgs(root.opts, args)
 		},

@@ -17,7 +17,7 @@ builds:
     - amd64
     - 386
   ldflags:
-    - -s -w
+    - -s -w -X 'main.version={{ .Version }}'
   # hooks:
   #   post: make compress
 
