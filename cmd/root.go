@@ -3,26 +3,37 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"strings"
 
-	"github.com/eiladin/tldr/internal/cache"
 	"github.com/eiladin/tldr/internal/config"
-	"github.com/eiladin/tldr/internal/page"
+	"github.com/eiladin/tldr/internal/pipeline"
+	"github.com/eiladin/tldr/pkg/context"
 	"github.com/spf13/cobra"
 )
+
+type options struct {
+	update   bool
+	platform string
+	random   bool
+	color    bool
+	purge    bool
+}
+
+var opts options
 
 var rootCmd = &cobra.Command{
 	Use:     "tldr",
 	Short:   "Simplified and community-driven man pages",
 	Long:    `Simplified and community-driven man pages`,
 	Version: "1.3.11",
-	Args:    ValidateArgs,
+	Args:    validateArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		f := createFlags(cmd)
-		findPage(os.Stdout, f, cache.DefaultSettings, args...)
+		_, err := findPage(args...)
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
 	},
 }
 
@@ -36,15 +47,15 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("update", "u", false, fmt.Sprintf("Clear local cache and update from %s", cache.DefaultSettings.Remote))
-	rootCmd.Flags().BoolP("random", "r", false, "Random page for testing purposes.")
-	rootCmd.Flags().StringP("platform", "p", config.CurrentPlatform(), "Platform to show usage for (run 'tldr platforms' to see available platforms)")
-	rootCmd.Flags().BoolP("color", "c", true, "Pretty Print (color and formatting)")
-	rootCmd.Flags().BoolP("purge", "", false, "Clear local cache")
+	rootCmd.Flags().BoolVarP(&opts.update, "update", "u", false, "update local cache")
+	rootCmd.Flags().BoolVarP(&opts.random, "random", "r", false, "random page for testing purposes")
+	rootCmd.Flags().StringVarP(&opts.platform, "platform", "p", config.CurrentPlatform(), "platform to show usage for (run 'tldr platforms' to see available platforms)")
+	rootCmd.Flags().BoolVarP(&opts.color, "color", "c", true, "pretty print (color and formatting)")
+	rootCmd.Flags().BoolVarP(&opts.purge, "purge", "", false, "clear local cache")
 }
 
 // ValidateArgs checks to make sure user input is valid before execution
-func ValidateArgs(cmd *cobra.Command, args []string) error {
+func validateArgs(cmd *cobra.Command, args []string) error {
 	update, _ := cmd.Flags().GetBool("update")
 	random, _ := cmd.Flags().GetBool("random")
 	purge, _ := cmd.Flags().GetBool("purge")
@@ -54,121 +65,16 @@ func ValidateArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-type flags struct {
-	update   bool
-	platform string
-	random   bool
-	color    bool
-	purge    bool
+func findPage(args ...string) (*context.Context, error) {
+	ctx := context.New()
+	setupContext(ctx, args...)
+	return pipeline.Execute(ctx, pipeline.RenderPipeline)
 }
 
-func createFlags(cmd *cobra.Command) flags {
-	u, _ := cmd.Flags().GetBool("update")
-	p, _ := cmd.Flags().GetString("platform")
-	r, _ := cmd.Flags().GetBool("random")
-	c, _ := cmd.Flags().GetBool("color")
-	pu, _ := cmd.Flags().GetBool("purge")
-
-	res := flags{
-		update:   u,
-		platform: p,
-		random:   r,
-		color:    c,
-		purge:    pu,
-	}
-	return res
-}
-
-var logFatalf = log.Fatalf
-
-func findPage(w io.Writer, f flags, settings cache.Cache, args ...string) {
-	if f.purge {
-		purgeCache(w, settings)
-		return
-	}
-
-	cache := initCache(w, settings)
-
-	validatePlatform(cache, f.platform)
-
-	if f.update {
-		updateCache(w, cache)
-	}
-
-	if f.random {
-		printRandomPage(w, cache, f)
-	} else {
-		cmd := strings.Join(args, "-")
-		if f.update && cmd == "" {
-			return
-		}
-		printPage(w, cache, f, cmd)
-	}
-}
-
-func purgeCache(w io.Writer, settings cache.Cache) {
-	fmt.Fprintf(w, "Clearing cache ... ")
-	err := settings.Purge()
-	if err != nil {
-		logFatalf("ERROR: %s", err)
-	}
-	fmt.Fprintf(w, "Done\n")
-}
-
-func initCache(w io.Writer, settings cache.Cache) *cache.Cache {
-	c, err := cache.Create(w, settings.Remote, settings.TTL, settings.Location)
-	if err != nil {
-		logFatalf("ERROR: %s", err)
-	}
-	return c
-}
-
-func validatePlatform(cache *cache.Cache, platform string) {
-	platformValid, availablePlatforms := cache.IsPlatformValid(platform)
-	if !platformValid {
-		logFatalf("ERROR: platform %s not found\nAvailable platforms: %s", platform, strings.Join(availablePlatforms, ", "))
-	}
-}
-
-func updateCache(w io.Writer, cache *cache.Cache) {
-	fmt.Fprint(w, "Refreshing Cache ... ")
-	err := cache.Refresh()
-	if err != nil {
-		logFatalf("ERROR: unable to update cache, %s", err)
-	}
-	fmt.Fprintln(w, "Done")
-}
-
-func formatPlatform(platform string, foundPlatform string) string {
-	if foundPlatform != platform {
-		foundPlatform = fmt.Sprintf("%s (%s)", platform, foundPlatform)
-	}
-	return foundPlatform
-}
-
-func printRandomPage(w io.Writer, cache *cache.Cache, f flags) {
-	c, foundPlatform, err := cache.FetchRandomPage(f.platform)
-	if err != nil {
-		logFatalf("ERROR: %s", err)
-	}
-	foundPlatform = formatPlatform(f.platform, foundPlatform)
-	defer c.Close()
-	write(c, w, foundPlatform, f)
-}
-
-func printPage(w io.Writer, cache *cache.Cache, f flags, page string) {
-	c, foundPlatform, err := cache.FetchPage(f.platform, page)
-	if err != nil {
-		fmt.Fprintln(w, err)
-		return
-	}
-	foundPlatform = formatPlatform(f.platform, foundPlatform)
-	defer c.Close()
-	write(c, w, foundPlatform, f)
-}
-
-func write(c io.ReadCloser, w io.Writer, platform string, f flags) {
-	if err := page.Write(c, w, platform, f.color); err != nil {
-		logFatalf("ERROR: rendering page: %s", err)
-	}
+func setupContext(ctx *context.Context, args ...string) {
+	ctx.PurgeCache = opts.purge
+	ctx.Platform = opts.platform
+	ctx.Random = opts.random
+	ctx.Color = opts.color
+	ctx.Args = strings.Join(args, "-")
 }
