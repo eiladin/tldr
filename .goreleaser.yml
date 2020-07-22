@@ -37,7 +37,7 @@ archives:
     - tldr-pages-LICENSE.md
 
 brews:
-- github:
+- tap:
     owner: eiladin
     name: homebrew-tldr
   commit_author:
