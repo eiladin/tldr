@@ -7,5 +7,5 @@ import (
 )
 
 func TestLogging(t *testing.T) {
-	require.NoError(t, Logging("foo", mockAction(nil), DefaultInitialPadding)(ctx))
+	require.NoError(t, Logging("foo", mockAction(nil))(ctx))
 }

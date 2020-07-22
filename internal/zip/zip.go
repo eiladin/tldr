@@ -3,12 +3,11 @@ package zip
 import (
 	"archive/zip"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"golang.org/x/xerrors"
 )
 
 var (
@@ -27,14 +26,14 @@ func Extract(src string, dest string) ([]string, error) {
 
 	r, err := zip.OpenReader(src)
 	if err != nil {
-		return filenames, xerrors.Errorf("zip: %s: %w", err, ErrOpeningReader)
+		return filenames, fmt.Errorf("zip: %s: %s", err, ErrOpeningReader.Error())
 	}
 	defer r.Close()
 
 	for _, f := range r.File {
 		fpath := filepath.Join(dest, f.Name)
 		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return filenames, xerrors.Errorf("zip: %s: %w", err, ErrIllegalFilePath)
+			return filenames, fmt.Errorf("zip: %s: %s", err, ErrIllegalFilePath.Error())
 		}
 
 		filenames = append(filenames, fpath)
@@ -45,17 +44,17 @@ func Extract(src string, dest string) ([]string, error) {
 		}
 
 		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-			return filenames, xerrors.Errorf("zip: %s: %w", err, ErrCreateOutputDir)
+			return filenames, fmt.Errorf("zip: %s: %s", err, ErrCreateOutputDir.Error())
 		}
 
 		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 		if err != nil {
-			return filenames, xerrors.Errorf("zip: %s: %w", err, ErrOpeningOutputFile)
+			return filenames, fmt.Errorf("zip: %s: %s", err, ErrOpeningOutputFile.Error())
 		}
 
 		rc, err := f.Open()
 		if err != nil {
-			return filenames, xerrors.Errorf("zip: %s: %w", err, ErrOpeningFileInZip)
+			return filenames, fmt.Errorf("zip: %s: %s", err, ErrOpeningFileInZip.Error())
 		}
 
 		_, err = io.Copy(outFile, rc)
@@ -63,7 +62,7 @@ func Extract(src string, dest string) ([]string, error) {
 		rc.Close()
 
 		if err != nil {
-			return filenames, xerrors.Errorf("zip: %s: %w", err, ErrCopyingFile)
+			return filenames, fmt.Errorf("zip: %s: %s", err, ErrCopyingFile.Error())
 		}
 	}
 	return filenames, nil

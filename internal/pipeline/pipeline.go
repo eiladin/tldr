@@ -26,7 +26,6 @@ func Execute(ctx *context.Context, pipeline []Piper) (*context.Context, error) {
 		if err := middleware.Logging(
 			pipe.String(),
 			middleware.ErrHandler(pipe.Run),
-			middleware.DefaultInitialPadding,
 		)(ctx); err != nil {
 			return ctx, err
 		}
