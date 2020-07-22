@@ -14,7 +14,7 @@ import (
 type Pipe struct{}
 
 func (Pipe) String() string {
-	return "getting page"
+	return "rendering page"
 }
 
 func (Pipe) Run(ctx *context.Context) error {

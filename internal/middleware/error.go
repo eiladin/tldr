@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"github.com/apex/log"
 	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/pkg/context"
+	log "github.com/sirupsen/logrus"
 )
 
 // ErrHandler handles an action error, ignoring and logging pipe skipped
@@ -18,6 +18,7 @@ func ErrHandler(action Action) Action {
 			log.WithFields(log.Fields{"message": err}).Debug("pipe skipped")
 			return nil
 		}
+		log.Error(err)
 		return err
 	}
 }

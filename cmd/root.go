@@ -10,6 +10,7 @@ import (
 	"github.com/eiladin/tldr/internal/config"
 	"github.com/eiladin/tldr/internal/pipeline"
 	"github.com/eiladin/tldr/pkg/context"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,15 @@ func Execute() {
 	}
 }
 
+var debug bool
+
 func init() {
+	cobra.OnInitialize(func() {
+		if debug {
+			logrus.SetLevel(logrus.DebugLevel)
+		}
+	})
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "debug mode")
 	rootCmd.Flags().BoolVarP(&opts.update, "update", "u", false, "update local cache")
 	rootCmd.Flags().BoolVarP(&opts.random, "random", "r", false, "random page for testing purposes")
 	rootCmd.Flags().StringVarP(&opts.platform, "platform", "p", config.CurrentPlatform(), "platform to show usage for (run 'tldr platforms' to see available platforms)")

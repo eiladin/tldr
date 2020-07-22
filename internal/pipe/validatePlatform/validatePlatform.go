@@ -10,7 +10,7 @@ import (
 type Pipe struct{}
 
 func (Pipe) String() string {
-	return "checking platform"
+	return "verifying platform"
 }
 
 func (Pipe) Run(ctx *context.Context) error {
