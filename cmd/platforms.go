@@ -8,26 +8,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// platformsCmd represents the platforms command
-var listPlatformsCmd = &cobra.Command{
-	Use:   "platforms",
-	Short: "List available platforms.",
-	Long:  `List available platforms.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		_, err := listPlatforms(args...)
-		if err != nil {
-			log.Fatalf(err.Error())
-		}
-	},
+type platformsCmd struct {
+	cmd *cobra.Command
 }
 
-func init() {
-	rootCmd.AddCommand(listPlatformsCmd)
+func newPlatformsCmd() *platformsCmd {
+	c := &platformsCmd{}
+	cmd := &cobra.Command{
+		Use:           "platforms",
+		Short:         "List available platforms.",
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		Run: func(cmd *cobra.Command, args []string) {
+			_, err := listPlatforms(args...)
+			if err != nil {
+				log.Fatalf(err.Error())
+			}
+		},
+	}
+	c.cmd = cmd
+	return c
 }
 
 func listPlatforms(args ...string) (*context.Context, error) {
 	ctx := context.New()
-	setupContext(ctx, args...)
-	ctx.Operation = context.OperationListPlatforms
+	setupPlatformsContext(ctx)
 	return pipeline.Execute(ctx, pipeline.ListPlatformsPipeline)
+}
+
+func setupPlatformsContext(ctx *context.Context) *context.Context {
+	ctx.Operation = context.OperationListPlatforms
+	return ctx
 }

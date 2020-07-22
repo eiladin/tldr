@@ -2,37 +2,40 @@ package cmd
 
 import (
 	"io"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// zshCmd represents the zsh command
-var zshCmd = &cobra.Command{
-	Use:   "zsh",
-	Short: "Generates zsh completion scripts",
-	Long: `To load completion for oh-my-zsh:
-  copy output to $ZSH_CUSTOM/plugins/tldr/_tldr
-
-  mkdir -p $ZSH_CUSTOM/plugins/tldr &&
-  tldr completion zsh > $ZSH_CUSTOM/plugins/tldr/_tldr
-
-  Then define it in .zshrc as a plugin:
-  plugins=(git tldr)
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		genZshCompletion(os.Stdout)
-	},
+type zshCmd struct {
+	cmd *cobra.Command
 }
 
-func init() {
-	completionCmd.AddCommand(zshCmd)
-}
-
-func genZshCompletion(w io.Writer) {
-	err := rootCmd.GenZshCompletion(w)
-	if err != nil {
-		log.Fatalf("ERROR: generating zsh completion: %s", err)
+func newZshCmd() *zshCmd {
+	c := &zshCmd{}
+	cmd := &cobra.Command{
+		Use:   "zsh",
+		Short: "Generates zsh completion scripts",
+		Long: `To load completion for oh-my-zsh:
+		copy output to $ZSH_CUSTOM/plugins/tldr/_tldr
+	
+		$ mkdir -p $ZSH_CUSTOM/plugins/tldr && \
+		tldr completion zsh > $ZSH_CUSTOM/plugins/tldr/_tldr
+	
+		Then define it in .zshrc as a plugin:
+		plugins=(git tldr)
+		`,
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		Run: func(cmd *cobra.Command, args []string) {
+			genZshCompletion(cmd, os.Stdout)
+		},
 	}
+
+	c.cmd = cmd
+	return c
+}
+
+func genZshCompletion(cmd *cobra.Command, w io.Writer) {
+	cmd.Root().GenZshCompletion(w)
 }

@@ -4,13 +4,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// completionCmd represents the completion command
-var completionCmd = &cobra.Command{
-	Use:   "completion",
-	Short: "Generates completion scripts",
-	Long:  `Generate shell completion scripts`,
+type completionCmd struct {
+	cmd *cobra.Command
 }
 
-func init() {
-	rootCmd.AddCommand(completionCmd)
+func newCompletionCmd() *completionCmd {
+	var c = &completionCmd{}
+	var cmd = &cobra.Command{
+		Use:           "completion",
+		Short:         "Generates completion scripts",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+	}
+
+	cmd.AddCommand(
+		newBashCmd().cmd,
+		newPwshCmd().cmd,
+		newZshCmd().cmd,
+	)
+
+	c.cmd = cmd
+	return c
 }
