@@ -6,6 +6,8 @@ import (
 	"github.com/eiladin/tldr/cmd"
 )
 
+var version = "dev"
+
 func main() {
-	cmd.Execute(os.Args[1:])
+	cmd.Execute(version, os.Args[1:])
 }
