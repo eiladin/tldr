@@ -1,13 +1,14 @@
-package initCache
+package initialize
 
 import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 
-	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/internal/zip"
 	"github.com/eiladin/tldr/pkg/context"
 )
@@ -19,11 +20,10 @@ var (
 	errDownloadingFile     = errors.New("unable to download file")
 	errSavingZipToCache    = errors.New("unable to save zip to cache")
 	errRemovingZip         = errors.New("unable to remove zip")
+	errReadingPagesDir     = errors.New("unable to read pages folder")
 )
 
-const (
-	zipPath = "/tldr.zip"
-)
+const zipPath = "tldr.zip"
 
 type Pipe struct{}
 
@@ -32,39 +32,40 @@ func (Pipe) String() string {
 }
 
 func (Pipe) Run(ctx *context.Context) error {
-	_, err := os.Stat(ctx.Cache.Location)
-	if os.IsNotExist(err) {
-		if err = createAndLoad(ctx); err != nil {
-			return err
+	if err := createAndLoad(ctx); err != nil {
+		return err
+	}
+
+	available, err := ioutil.ReadDir(path.Join(ctx.Cache.Location, ctx.PagesDirectory))
+	if err != nil {
+		return fmt.Errorf("cache: %s: %s", err, errReadingPagesDir.Error())
+	}
+
+	for _, f := range available {
+		if f.IsDir() {
+			ctx.AvailablePlatforms = append(ctx.AvailablePlatforms, f.Name())
 		}
-	} else if err != nil {
-		return fmt.Errorf("cache: %s: %s", err, errGettingCacheFolder.Error())
-	} else {
-		return pipe.Skip("cache is up-to-date")
 	}
 	return nil
 }
 
 func createAndLoad(ctx *context.Context) error {
-	if err := createCacheFolder(ctx); err != nil {
-		return err
-	}
-	if err := loadFromRemote(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
-func createCacheFolder(ctx *context.Context) error {
-	err := os.MkdirAll(ctx.Cache.Location, 0755)
-	if err != nil {
-		return fmt.Errorf("cache: %s: %s", err, errCreatingCacheFolder.Error())
+	_, err := os.Stat(ctx.Cache.Location)
+	if os.IsNotExist(err) {
+		if err := os.MkdirAll(ctx.Cache.Location, 0755); err != nil {
+			return fmt.Errorf("cache: %s: %s", err, errCreatingCacheFolder.Error())
+		}
+		if err := loadFromRemote(ctx); err != nil {
+			return err
+		}
+	} else if err != nil {
+		return fmt.Errorf("cache: %s: %s", err, errGettingCacheFolder.Error())
 	}
 	return nil
 }
 
 func loadFromRemote(ctx *context.Context) error {
-	dir, err := os.Create(ctx.Cache.Location + zipPath)
+	dir, err := os.Create(path.Join(ctx.Cache.Location + zipPath))
 	if err != nil {
 		return fmt.Errorf("cache: %s: %s", err, errCreatingZip.Error())
 	}
@@ -73,6 +74,7 @@ func loadFromRemote(ctx *context.Context) error {
 	if resp.Body != nil {
 		defer resp.Body.Close()
 	}
+
 	if err != nil || resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("cache: %q: %s", ctx.Cache.Remote, errDownloadingFile.Error())
 	}

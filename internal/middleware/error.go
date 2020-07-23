@@ -6,8 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ErrHandler handles an action error, ignoring and logging pipe skipped
-// errors.
 func ErrHandler(action Action) Action {
 	return func(ctx *context.Context) error {
 		var err = action(ctx)

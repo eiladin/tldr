@@ -1,4 +1,4 @@
-package purgeCache
+package invalidate
 
 import (
 	"errors"

@@ -1,4 +1,4 @@
-package validatePlatform
+package verify
 
 import (
 	"fmt"

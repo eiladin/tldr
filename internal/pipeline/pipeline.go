@@ -5,14 +5,13 @@ import (
 
 	"github.com/eiladin/tldr/internal/middleware"
 	"github.com/eiladin/tldr/internal/pipe/commands"
-	"github.com/eiladin/tldr/internal/pipe/initCache"
-	"github.com/eiladin/tldr/internal/pipe/listPlatforms"
+	"github.com/eiladin/tldr/internal/pipe/initialize"
+	"github.com/eiladin/tldr/internal/pipe/invalidate"
 	"github.com/eiladin/tldr/internal/pipe/page"
 	"github.com/eiladin/tldr/internal/pipe/platforms"
-	"github.com/eiladin/tldr/internal/pipe/purgeCache"
 	"github.com/eiladin/tldr/internal/pipe/random"
 	"github.com/eiladin/tldr/internal/pipe/render"
-	"github.com/eiladin/tldr/internal/pipe/validatePlatform"
+	"github.com/eiladin/tldr/internal/pipe/verify"
 	"github.com/eiladin/tldr/pkg/context"
 )
 
@@ -34,26 +33,23 @@ func Execute(ctx *context.Context, pipeline []Piper) (*context.Context, error) {
 }
 
 var RenderPipeline = []Piper{
-	purgeCache.Pipe{},
-	initCache.Pipe{},
-	platforms.Pipe{},
-	validatePlatform.Pipe{},
+	invalidate.Pipe{},
+	initialize.Pipe{},
+	verify.Pipe{},
 	random.Pipe{},
 	page.Pipe{},
 	render.Pipe{},
 }
 
 var ListCommandsPipeline = []Piper{
-	purgeCache.Pipe{},
-	initCache.Pipe{},
-	platforms.Pipe{},
-	validatePlatform.Pipe{},
+	invalidate.Pipe{},
+	initialize.Pipe{},
+	verify.Pipe{},
 	commands.Pipe{},
 }
 
 var ListPlatformsPipeline = []Piper{
-	purgeCache.Pipe{},
-	initCache.Pipe{},
+	invalidate.Pipe{},
+	initialize.Pipe{},
 	platforms.Pipe{},
-	listPlatforms.Pipe{},
 }

@@ -1,4 +1,4 @@
-package initCache
+package initialize
 
 import (
 	"os"
@@ -28,4 +28,8 @@ func TestInitCache(t *testing.T) {
 	err := Pipe{}.Run(ctx)
 	assert.NoError(t, err)
 	assert.DirExists(t, "./test-cache/pages")
+	assert.Contains(t, ctx.AvailablePlatforms, "linux")
+	assert.Contains(t, ctx.AvailablePlatforms, "osx")
+	assert.Contains(t, ctx.AvailablePlatforms, "sunos")
+	assert.Contains(t, ctx.AvailablePlatforms, "windows")
 }

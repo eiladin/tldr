@@ -1,52 +1,25 @@
 package platforms
 
 import (
-	"fmt"
-	"os"
-	"path"
+	"bytes"
 	"testing"
-	"time"
 
 	"github.com/eiladin/tldr/pkg/context"
 	"github.com/stretchr/testify/assert"
 )
 
-func initTest(cases []test) {
-	dir := "./test-cache/pages"
-	for _, c := range cases {
-		os.MkdirAll(path.Join(dir, c.platform), 0755)
-		for _, e := range c.expectations {
-			os.Create(path.Join(dir, c.platform, fmt.Sprintf("%s.md", e)))
-		}
-	}
-}
-
-func cleanTest() {
-	os.RemoveAll("./test-cache")
-}
-
-type test struct {
-	platform     string
-	expectations []string
-}
-
-func TestPlatforms(t *testing.T) {
-	defer cleanTest()
-	cases := []test{
-		{"linux", []string{"dmesg", "alpine"}},
-		{"osx", []string{"dmesg", "brew"}},
-		{"sunos", []string{"dmesg", "stty"}},
-		{"windows", []string{"rmdir", "mkdir"}},
-	}
-	initTest(cases)
-
-	for _, c := range cases {
-		ctx := context.New()
-		ctx.Cache.Location = "./test-cache"
-		ctx.Cache.TTL = time.Minute
-		ctx.Platform = c.platform
-		err := Pipe{}.Run(ctx)
-		assert.NoError(t, err)
-		assert.Contains(t, ctx.AvailablePlatforms, c.platform)
-	}
+func TestPlaformList(t *testing.T) {
+	var b bytes.Buffer
+	ctx := context.New()
+	ctx.Writer = &b
+	ctx.Operation = context.OperationListPlatforms
+	ctx.AvailablePlatforms = []string{"linux", "sunos", "windows", "osx", "common"}
+	err := Pipe{}.Run(ctx)
+	out := b.String()
+	assert.NoError(t, err)
+	assert.Contains(t, out, "common")
+	assert.Contains(t, out, "linux")
+	assert.Contains(t, out, "osx")
+	assert.Contains(t, out, "sunos")
+	assert.Contains(t, out, "windows")
 }

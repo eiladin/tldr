@@ -3,8 +3,6 @@ package platforms
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"path"
 
 	"github.com/eiladin/tldr/pkg/context"
 )
@@ -16,22 +14,12 @@ var (
 type Pipe struct{}
 
 func (Pipe) String() string {
-	return "loading platforms"
+	return "listing platforms"
 }
 
 func (Pipe) Run(ctx *context.Context) error {
-	var platforms []string
-	available, err := ioutil.ReadDir(path.Join(ctx.Cache.Location, ctx.PagesDirectory))
-	if err != nil {
-		return fmt.Errorf("cache: %s: %s", err, errReadingPagesDir.Error())
+	for _, platform := range ctx.AvailablePlatforms {
+		fmt.Fprintln(ctx.Writer, platform)
 	}
-
-	for _, f := range available {
-		platform := f.Name()
-		if f.IsDir() {
-			platforms = append(platforms, platform)
-		}
-	}
-	ctx.AvailablePlatforms = platforms
 	return nil
 }
