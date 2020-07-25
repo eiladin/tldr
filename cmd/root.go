@@ -101,5 +101,4 @@ func validateArgs(opts options, args []string) error {
 		return errors.New("Command required")
 	}
 	return nil
-
 }

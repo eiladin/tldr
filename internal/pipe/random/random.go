@@ -43,7 +43,7 @@ func (Pipe) Run(ctx *context.Context) error {
 		}
 		ctx.Page = page
 	} else {
-		pipe.Skip("not serving a random page")
+		return pipe.Skip("not serving a random page")
 	}
 	return nil
 }

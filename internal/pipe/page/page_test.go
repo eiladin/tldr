@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/pkg/context"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,6 +29,11 @@ func cleanTest() {
 type test struct {
 	platform     string
 	expectations []string
+}
+
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
 }
 
 func TestPage(t *testing.T) {
@@ -52,4 +58,36 @@ func TestPage(t *testing.T) {
 			assert.Contains(t, ctx.Page, expectation)
 		}
 	}
+}
+
+func TestRandom(t *testing.T) {
+	ctx := context.New()
+	ctx.Cache.Location = "./test-cache"
+	ctx.Cache.TTL = time.Minute
+	ctx.Platform = "linux"
+	ctx.Random = true
+	err := Pipe{}.Run(ctx)
+	assert.Error(t, err)
+	assert.True(t, pipe.IsSkip(err))
+}
+
+func TestSkip(t *testing.T) {
+	ctx := context.New()
+	ctx.Cache.Location = "./test-cache"
+	ctx.Cache.TTL = time.Minute
+	ctx.Platform = "linux"
+	err := Pipe{}.Run(ctx)
+	assert.Error(t, err)
+	assert.True(t, pipe.IsSkip(err))
+}
+
+func TestNotFound(t *testing.T) {
+	ctx := context.New()
+	ctx.Cache.Location = "./test-cache"
+	ctx.Cache.TTL = time.Minute
+	ctx.Platform = "linux"
+	ctx.Args = "not found"
+	err := Pipe{}.Run(ctx)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Submit new pages here")
 }

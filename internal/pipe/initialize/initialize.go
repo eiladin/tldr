@@ -38,7 +38,7 @@ func (Pipe) Run(ctx *context.Context) error {
 
 	available, err := ioutil.ReadDir(path.Join(ctx.Cache.Location, ctx.PagesDirectory))
 	if err != nil {
-		return fmt.Errorf("cache: %s: %s", err, errReadingPagesDir.Error())
+		return fmt.Errorf("cache: %s: %w", err, errReadingPagesDir)
 	}
 
 	for _, f := range available {
@@ -53,43 +53,46 @@ func createAndLoad(ctx *context.Context) error {
 	_, err := os.Stat(ctx.Cache.Location)
 	if os.IsNotExist(err) {
 		if err := os.MkdirAll(ctx.Cache.Location, 0755); err != nil {
-			return fmt.Errorf("cache: %s: %s", err, errCreatingCacheFolder.Error())
+			return fmt.Errorf("cache: %s: %w", err, errCreatingCacheFolder)
 		}
 		if err := loadFromRemote(ctx); err != nil {
 			return err
 		}
 	} else if err != nil {
-		return fmt.Errorf("cache: %s: %s", err, errGettingCacheFolder.Error())
+		return fmt.Errorf("cache: %s: %w", err, errGettingCacheFolder)
 	}
 	return nil
 }
 
 func loadFromRemote(ctx *context.Context) error {
-	dir, err := os.Create(path.Join(ctx.Cache.Location + zipPath))
+	dir, err := os.Create(path.Join(ctx.Cache.Location, zipPath))
 	if err != nil {
-		return fmt.Errorf("cache: %s: %s", err, errCreatingZip.Error())
+		return fmt.Errorf("cache: %s: %w", err, errCreatingZip)
 	}
 
 	resp, err := http.Get(ctx.Cache.Remote)
+	if err != nil {
+		return fmt.Errorf("cache: %q: %w", ctx.Cache.Remote, errDownloadingFile)
+	}
 	if resp.Body != nil {
 		defer resp.Body.Close()
 	}
 
-	if err != nil || resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("cache: %q: %s", ctx.Cache.Remote, errDownloadingFile.Error())
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("cache: %q: %w", ctx.Cache.Remote, errDownloadingFile)
 	}
 
 	if _, err = io.Copy(dir, resp.Body); err != nil {
-		return fmt.Errorf("cache: %s: %s", err.Error(), errSavingZipToCache.Error())
+		return fmt.Errorf("cache: %s: %w", err, errSavingZipToCache)
 	}
 
-	if _, err = zip.Extract(ctx.Cache.Location+zipPath, ctx.Cache.Location); err != nil {
+	if _, err = zip.Extract(path.Join(ctx.Cache.Location, zipPath), ctx.Cache.Location); err != nil {
 		return err
 	}
 	dir.Close()
 
-	if err = os.Remove(ctx.Cache.Location + zipPath); err != nil {
-		return fmt.Errorf("cache: %s, %s", err, errRemovingZip.Error())
+	if err = os.Remove(path.Join(ctx.Cache.Location, zipPath)); err != nil {
+		return fmt.Errorf("cache: %s, %w", err, errRemovingZip)
 	}
 	return nil
 }

@@ -8,6 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
+}
+
 func TestAll(t *testing.T) {
 	ctx := context.New()
 	ctx.Cache.Location = "./test-cache"

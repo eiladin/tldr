@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/internal/renderer"
 	"github.com/eiladin/tldr/pkg/context"
 )
@@ -18,6 +19,9 @@ func (Pipe) String() string {
 }
 
 func (Pipe) Run(ctx *context.Context) error {
+	if len(strings.TrimSpace(ctx.Page)) == 0 {
+		return pipe.Skip("no page given")
+	}
 	r := renderer.ColorRenderer{
 		UseColor: ctx.Color,
 	}
