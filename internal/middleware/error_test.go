@@ -1,23 +1,26 @@
 package middleware
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/eiladin/tldr/internal/pipe"
-	"github.com/stretchr/testify/require"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
+func TestNoError(t *testing.T) {
+	err := ErrHandler(mockAction(nil))(ctx)
+	assert.NoError(t, err)
+}
+
 func TestError(t *testing.T) {
-	t.Run("no errors", func(t *testing.T) {
-		require.NoError(t, ErrHandler(mockAction(nil))(ctx))
-	})
+	log.SetLevel(log.PanicLevel)
+	err := ErrHandler(mockAction(errors.New("pipe errored")))(ctx)
+	assert.Error(t, err)
+}
 
-	t.Run("some err", func(t *testing.T) {
-		require.Error(t, ErrHandler(mockAction(fmt.Errorf("pipe errored")))(ctx))
-	})
-
-	t.Run("skipped", func(t *testing.T) {
-		require.NoError(t, ErrHandler(mockAction(pipe.Skip("test")))(ctx))
-	})
+func TestSkipped(t *testing.T) {
+	err := ErrHandler(mockAction(pipe.Skip("skipped")))(ctx)
+	assert.NoError(t, err)
 }
