@@ -13,12 +13,14 @@ import (
 
 var errRemovingCacheFolder = errors.New("unable to remove cache folder")
 
+// Pipe for invalidating the cache
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "clearing cache"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	cacheExpired := false
 	info, err := os.Stat(ctx.Cache.Location)

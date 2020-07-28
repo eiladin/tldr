@@ -15,12 +15,14 @@ import (
 
 var errListingPages = errors.New("unable to list pages")
 
+// Pipe for listing commands
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "listing commands"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	if strings.ToLower(ctx.Platform) == "all" {
 		pgs := make([]string, 0)
@@ -37,14 +39,13 @@ func (Pipe) Run(ctx *context.Context) error {
 		sort.Strings(pgs)
 		print(ctx, pgs)
 		return nil
-	} else {
-		pgs, err := getPages(ctx, ctx.Platform)
-		if err != nil {
-			return err
-		}
-		print(ctx, pgs)
-		return nil
 	}
+	pgs, err := getPages(ctx, ctx.Platform)
+	if err != nil {
+		return err
+	}
+	print(ctx, pgs)
+	return nil
 }
 
 func print(ctx *context.Context, pages []string) {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,16 +26,16 @@ func downloadZip(location string) {
 func TestExtract(t *testing.T) {
 	const location = "./tldr-zip-test"
 	os.Mkdir(location, 0755) //nolint:errcheck
+	defer os.RemoveAll(location)
 	downloadZip(location + "/tldr.zip")
-	files, err := Extract(location+"/tldr.zip", location)
+	files, err := Extract(path.Join(location, "tldr.zip"), location)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, files, "zip should contain files")
-	os.RemoveAll(location)
 }
 
 func TestExtractNoSource(t *testing.T) {
 	const location = "./tldr-zip-nosource-test"
-	files, err := Extract(location+"/tldr.zip", location)
+	files, err := Extract(path.Join(location, "/tldr.zip"), location)
 	assert.Empty(t, files)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ErrOpeningReader.Error())
@@ -43,11 +44,13 @@ func TestExtractNoSource(t *testing.T) {
 func TestExtractDirExists(t *testing.T) {
 	const location = "./tldr-zip-bad-dir-test"
 	os.Mkdir(location, 0100) //nolint:errcheck
+	defer func() {
+		os.RemoveAll(location)
+		os.Remove("./tldr.zip")
+	}()
 	downloadZip("./tldr.zip")
 	files, err := Extract("./tldr.zip", location)
 	assert.NotEmpty(t, files)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ErrCreateOutputDir.Error())
-	os.RemoveAll(location)
-	os.RemoveAll("./tldr.zip")
 }

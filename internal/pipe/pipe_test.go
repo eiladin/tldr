@@ -10,6 +10,7 @@ import (
 func TestSkipPipe(t *testing.T) {
 	var reason = "this is a test"
 	var err = Skip(reason)
+	assert.True(t, IsSkip(err))
 	assert.Error(t, err)
 	assert.Equal(t, reason, err.Error())
 }

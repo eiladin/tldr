@@ -8,6 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
+}
+
 func TestPlaformList(t *testing.T) {
 	var b bytes.Buffer
 	ctx := context.New()

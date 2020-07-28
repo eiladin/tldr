@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/pkg/context"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,6 +39,11 @@ var expectation = "cat\n" +
 	"- Display non-printable and whitespace characters (with `M-` prefix if non-ASCII):\n" +
 	"  cat -v -t -e file\n"
 
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
+}
+
 func TestRender(t *testing.T) {
 	var b bytes.Buffer
 	os.MkdirAll("./test-cache/pages/linux", 0755)
@@ -57,4 +63,17 @@ func TestRender(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, out, expectation)
 	os.RemoveAll("./test-cache")
+}
+
+func TestSkip(t *testing.T) {
+	ctx := context.New()
+	err := Pipe{}.Run(ctx)
+	assert.True(t, pipe.IsSkip(err))
+}
+
+func TestDirError(t *testing.T) {
+	ctx := context.New()
+	ctx.Page = "not-found.page"
+	err := Pipe{}.Run(ctx)
+	assert.True(t, os.IsNotExist(err))
 }

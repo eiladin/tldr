@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"os"
 
 	"github.com/eiladin/tldr/internal/config"
 	"github.com/eiladin/tldr/internal/pipeline"
@@ -28,7 +28,7 @@ func newCommandsCmd() *commandsCmd {
 		Run: func(cmd *cobra.Command, args []string) {
 			_, err := listCommands(c.opts, args...)
 			if err != nil {
-				log.Fatalf(err.Error())
+				os.Exit(1)
 			}
 		},
 	}

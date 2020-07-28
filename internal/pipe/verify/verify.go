@@ -7,12 +7,14 @@ import (
 	"github.com/eiladin/tldr/pkg/context"
 )
 
+// Pipe for verifying the selected platform
 type Pipe struct{}
 
 func (Pipe) String() string {
-	return "verifying platform"
+	return "verifying selected platform"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	valid := false
 	if ctx.Operation == context.OperationListCommands && ctx.Platform == "all" {

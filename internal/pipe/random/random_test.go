@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/pkg/context"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,16 +31,20 @@ type test struct {
 	expectations []string
 }
 
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
+}
+
 func TestRandom(t *testing.T) {
 	defer cleanTest("./test-cache")
-	commonTest := test{"common", []string{"ls", "curl"}}
 
 	cases := []test{
 		{"linux", []string{"dmesg", "alpine"}},
 		{"osx", []string{"dmesg", "brew"}},
 		{"sunos", []string{"dmesg", "stty"}},
 		{"windows", []string{"rmdir", "mkdir"}},
-		commonTest,
+		{"common", []string{"ls", "curl"}},
 	}
 	initTest("./test-cache", cases)
 
@@ -59,4 +64,22 @@ func TestRandom(t *testing.T) {
 			assert.Contains(t, ctx.Page, c.platform)
 		}
 	}
+}
+
+func TestSkip(t *testing.T) {
+	ctx := context.New()
+	err := Pipe{}.Run(ctx)
+	assert.Error(t, err)
+	assert.True(t, pipe.IsSkip(err))
+}
+
+func TestDirError(t *testing.T) {
+	ctx := context.New()
+	ctx.Cache.Location = "."
+	ctx.PagesDirectory = "pages"
+	ctx.Platform = "none"
+	ctx.Random = true
+	err := Pipe{}.Run(ctx)
+	assert.Error(t, err)
+	assert.True(t, os.IsNotExist(err))
 }

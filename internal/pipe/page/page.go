@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/pkg/context"
 )
 
+// Pipe for page
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "getting page"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	if !ctx.Random {
 		platforms := []string{ctx.Platform, "common"}
@@ -22,7 +25,7 @@ func (Pipe) Run(ctx *context.Context) error {
 			return err
 		}
 	} else {
-		pipe.Skip("serving a random page")
+		return pipe.Skip("serving a random page")
 	}
 	return nil
 }
@@ -37,6 +40,9 @@ func makePath(ctx *context.Context, platform string) string {
 }
 
 func getPage(platforms []string, ctx *context.Context) error {
+	if len(strings.TrimSpace(ctx.Args)) == 0 {
+		return pipe.Skip("no page given")
+	}
 	ps := make([]platformPath, 0)
 	for _, p := range platforms {
 		ps = append(ps, platformPath{Platform: p, Path: makePath(ctx, p)})
@@ -53,5 +59,5 @@ func getPage(platforms []string, ctx *context.Context) error {
 	}
 
 	return fmt.Errorf("This page (" + ctx.Args + ") does not exist yet!\n" +
-		"Submit new pages here: https://github.com/tldr-pages/tldr/issues/new?title=page%20request:%20" + ctx.Args)
+		"Submit new pages here: https://github.com/tldr-pages/tldr/issues/new?title=page%%20request:%%20" + ctx.Args)
 }

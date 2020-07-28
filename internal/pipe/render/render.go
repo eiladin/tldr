@@ -7,21 +7,24 @@ import (
 	"os"
 	"strings"
 
+	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/internal/renderer"
 	"github.com/eiladin/tldr/pkg/context"
 )
 
+// Pipe for rendering a page
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "rendering page"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
-	r := renderer.ColorRenderer{
-		UseColor: ctx.Color,
+	if len(strings.TrimSpace(ctx.Page)) == 0 {
+		return pipe.Skip("no page given")
 	}
-	r.Init()
+	r := renderer.New(ctx.Color)
 	closer, err := os.Open(ctx.Page)
 	if err != nil {
 		return err
@@ -32,7 +35,6 @@ func (Pipe) Run(ctx *context.Context) error {
 }
 
 func render(markdown io.Reader, r renderer.PageRenderer, ctx *context.Context) error {
-	r.Init()
 	scanner := bufio.NewScanner(markdown)
 	for scanner.Scan() {
 		line := scanner.Text()

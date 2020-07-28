@@ -11,12 +11,18 @@ import (
 )
 
 var (
-	ErrOpeningReader     = errors.New("can't open reader")
-	ErrIllegalFilePath   = errors.New("illegal file path")
-	ErrCreateOutputDir   = errors.New("unable to create output dir")
+	// ErrOpeningReader error when zip.OpenReader fails
+	ErrOpeningReader = errors.New("can't open reader")
+	// ErrIllegalFilePath error when filepath has invalid characters
+	ErrIllegalFilePath = errors.New("illegal file path")
+	// ErrCreateOutputDir error when creating output directory fails
+	ErrCreateOutputDir = errors.New("unable to create output dir")
+	// ErrOpeningOutputFile error when creating output file fails
 	ErrOpeningOutputFile = errors.New("unable to open output file")
-	ErrOpeningFileInZip  = errors.New("unable to open file for read")
-	ErrCopyingFile       = errors.New("unable to copy file")
+	// ErrOpeningFileInZip error when opening file in zip fails
+	ErrOpeningFileInZip = errors.New("unable to open file for read")
+	// ErrCopyingFile error when a file copy fails
+	ErrCopyingFile = errors.New("unable to copy file")
 )
 
 // Extract will unzip src into dest folder, creating dest folder if it does not exist

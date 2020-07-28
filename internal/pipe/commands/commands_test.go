@@ -31,6 +31,11 @@ type test struct {
 	expectations []string
 }
 
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
+}
+
 func TestListCommands(t *testing.T) {
 	defer cleanTest()
 
@@ -43,9 +48,19 @@ func TestListCommands(t *testing.T) {
 	}
 	initTest(cases)
 
+	platforms := []string{}
+	for _, p := range cases {
+		platforms = append(platforms, p.platform)
+	}
+
+	cases = append(cases,
+		test{"all", []string{"dmesg", "mkdir", "curl", "brew", "rmdir"}},
+	)
+
 	for _, c := range cases {
 		var b bytes.Buffer
 		ctx := context.New()
+		ctx.AvailablePlatforms = platforms
 		ctx.Cache.Location = "./test-cache"
 		ctx.Cache.TTL = time.Minute
 		ctx.Platform = c.platform

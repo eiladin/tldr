@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eiladin/tldr/internal/pipe"
 	"github.com/eiladin/tldr/pkg/context"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,6 +29,11 @@ func cleanTest(dir string) {
 type test struct {
 	platform     string
 	expectations []string
+}
+
+func TestString(t *testing.T) {
+	p := Pipe{}
+	assert.NotEmpty(t, p.String())
 }
 
 func TestPurgeCache(t *testing.T) {
@@ -66,4 +72,12 @@ func TestExpiredCache(t *testing.T) {
 	err := Pipe{}.Run(ctx)
 	assert.NoError(t, err)
 	assert.NoDirExists(t, "./expired-cache")
+}
+
+func TestSkip(t *testing.T) {
+	ctx := context.New()
+	ctx.Cache.Location = "./skip-test"
+	ctx.Cache.TTL = time.Hour
+	err := Pipe{}.Run(ctx)
+	assert.True(t, pipe.IsSkip(err))
 }
