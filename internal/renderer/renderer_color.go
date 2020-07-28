@@ -7,44 +7,20 @@ import (
 	"github.com/logrusorgru/aurora"
 )
 
-var (
-	au = aurora.NewAurora(false)
-)
-
-func titleText(arg interface{}) aurora.Value {
-	return au.Bold(au.White(arg))
-}
-
-func platformText(arg interface{}) aurora.Value {
-	return au.BrightBlack(arg)
-}
-
-func tagText(arg interface{}) aurora.Value {
-	return au.White(arg)
-}
-
-func descriptionText(arg interface{}) aurora.Value {
-	return au.White(arg)
-}
-
-func exampleHeaderText(arg interface{}) aurora.Value {
-	return au.Green(arg)
-}
-
-func exampleText(arg interface{}) aurora.Value {
-	return au.Blue(arg)
-}
-
 // ColorRenderer implements Renderer and prints with color and formatting
 type ColorRenderer struct {
-	UseColor bool
+	Color aurora.Aurora
 }
 
-func (renderer ColorRenderer) Init() {
-	au = aurora.NewAurora(renderer.UseColor)
+// New inits the color renderer
+func New(useColor bool) ColorRenderer {
+	au := aurora.NewAurora(useColor)
+	return ColorRenderer{
+		Color: au,
+	}
 }
 
-func formatSyntaxLine(line string) string {
+func (r ColorRenderer) formatSyntaxLine(line string) string {
 	formattedLine := "  "
 	line = strings.TrimSpace(line)
 	line = strings.Replace(line, "`", "", -1)
@@ -55,9 +31,9 @@ func formatSyntaxLine(line string) string {
 	for _, segment := range strings.Split(line, "{{") {
 		for _, piece := range strings.Split(segment, "}}") {
 			if inTag {
-				formattedLine += fmt.Sprint(tagText(piece))
+				formattedLine += fmt.Sprint(r.Color.White(piece))
 			} else {
-				formattedLine += fmt.Sprint(exampleText(piece))
+				formattedLine += fmt.Sprint(r.Color.Blue(piece))
 			}
 			inTag = !inTag
 		}
@@ -67,26 +43,26 @@ func formatSyntaxLine(line string) string {
 }
 
 // RenderTitle returns a formatted title
-func (renderer ColorRenderer) RenderTitle(line string) string {
-	return fmt.Sprintln(titleText(line))
+func (r ColorRenderer) RenderTitle(line string) string {
+	return fmt.Sprintln(r.Color.Bold(r.Color.White(line)))
 }
 
 // RenderPlatform returns a formatted platform
-func (renderer ColorRenderer) RenderPlatform(line string) string {
-	return fmt.Sprintln(platformText(line))
+func (r ColorRenderer) RenderPlatform(line string) string {
+	return fmt.Sprintln(r.Color.BrightBlack(line))
 }
 
 // RenderDescription returns a formatted description
-func (renderer ColorRenderer) RenderDescription(line string) string {
-	return fmt.Sprintln(descriptionText(line))
+func (r ColorRenderer) RenderDescription(line string) string {
+	return fmt.Sprintln(r.Color.White(line))
 }
 
 // RenderExample returns a formatted example header
-func (renderer ColorRenderer) RenderExample(line string) string {
-	return fmt.Sprintln(exampleHeaderText(line))
+func (r ColorRenderer) RenderExample(line string) string {
+	return fmt.Sprintln(r.Color.Green(line))
 }
 
 // RenderSyntax returns formatted example syntax
-func (renderer ColorRenderer) RenderSyntax(line string) string {
-	return formatSyntaxLine(line)
+func (r ColorRenderer) RenderSyntax(line string) string {
+	return r.formatSyntaxLine(line)
 }

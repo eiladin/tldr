@@ -11,12 +11,14 @@ import (
 	"github.com/eiladin/tldr/pkg/context"
 )
 
+// Pipe for getting a random page
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "getting random page"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	if ctx.Random {
 		commonPath := path.Join(ctx.Cache.Location, ctx.PagesDirectory, "common")

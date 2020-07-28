@@ -25,12 +25,14 @@ var (
 
 const zipPath = "tldr.zip"
 
+// Pipe for initializing cache
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "initializing cache"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	if err := createAndLoad(ctx); err != nil {
 		return err

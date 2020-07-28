@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+// Cache struct for working with the cache
 type Cache struct {
 	Location string
 	Remote   string
@@ -18,11 +19,15 @@ type Cache struct {
 }
 
 const (
-	OperationListCommands  = "list-commands"
+	// OperationListCommands operation
+	OperationListCommands = "list-commands"
+	// OperationListPlatforms operation
 	OperationListPlatforms = "list-platforms"
-	OperationRenderPage    = "render-page"
+	// OperationRenderPage operation
+	OperationRenderPage = "render-page"
 )
 
+// Context carries state through pipes
 type Context struct {
 	ctx.Context
 	PurgeCache         bool
@@ -41,6 +46,7 @@ type Context struct {
 	Operation          string
 }
 
+// RenderPlatform formats the platform as `requested (actual)`
 func (ctx *Context) RenderPlatform() string {
 	if ctx.FoundPlatform != ctx.Platform {
 		return fmt.Sprintf("%s (%s)", ctx.Platform, ctx.FoundPlatform)
@@ -48,6 +54,7 @@ func (ctx *Context) RenderPlatform() string {
 	return ctx.FoundPlatform
 }
 
+// New creates a new context
 func New() *Context {
 	location, _ := getCacheDir()
 	ctx := Context{

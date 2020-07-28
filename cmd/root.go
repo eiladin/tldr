@@ -21,6 +21,7 @@ type options struct {
 	purge    bool
 }
 
+// Execute is the main entrypoint for the application
 func Execute(version string, args []string) {
 	newRootCmd(version).Execute(args)
 }

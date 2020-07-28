@@ -10,12 +10,14 @@ import (
 	"github.com/eiladin/tldr/pkg/context"
 )
 
+// Pipe for page
 type Pipe struct{}
 
 func (Pipe) String() string {
 	return "getting page"
 }
 
+// Run the pipe
 func (Pipe) Run(ctx *context.Context) error {
 	if !ctx.Random {
 		platforms := []string{ctx.Platform, "common"}
