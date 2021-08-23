@@ -10,7 +10,8 @@ import (
 func TestPwshCompletion(t *testing.T) {
 	out := testdata.ReadStdOut(func() {
 		var cmd = newPwshCmd()
-		cmd.cmd.Execute()
+		err := cmd.cmd.Execute()
+		assert.NoError(t, err)
 	})
 
 	assert.Contains(t, out, "Register-ArgumentCompleter -Native -CommandName 'pwsh'")

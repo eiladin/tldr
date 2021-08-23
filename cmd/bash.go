@@ -35,5 +35,5 @@ func newBashCmd() *bashCmd {
 }
 
 func genBashCompletion(cmd *cobra.Command, w io.Writer) {
-	cmd.Root().GenBashCompletion(w)
+	_ = cmd.Root().GenBashCompletion(w)
 }

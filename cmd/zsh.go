@@ -37,5 +37,5 @@ func newZshCmd() *zshCmd {
 }
 
 func genZshCompletion(cmd *cobra.Command, w io.Writer) {
-	cmd.Root().GenZshCompletion(w)
+	_ = cmd.Root().GenZshCompletion(w)
 }

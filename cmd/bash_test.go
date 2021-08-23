@@ -10,7 +10,8 @@ import (
 func TestBashCompletion(t *testing.T) {
 	out := testdata.ReadStdOut(func() {
 		var cmd = newBashCmd()
-		cmd.cmd.Execute()
+		err := cmd.cmd.Execute()
+		assert.NoError(t, err)
 	})
 
 	assert.Contains(t, out, "bash completion")

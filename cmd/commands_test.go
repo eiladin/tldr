@@ -23,7 +23,8 @@ func TestCommandsCmd(t *testing.T) {
 		out := testdata.ReadStdOut(func() {
 			cmd := newCommandsCmd()
 			cmd.cmd.SetArgs([]string{"-p", c.platform})
-			cmd.cmd.Execute()
+			err := cmd.cmd.Execute()
+			assert.NoError(t, err)
 		})
 		for _, e := range c.expected {
 			assert.Contains(t, out, e)
@@ -33,9 +34,10 @@ func TestCommandsCmd(t *testing.T) {
 
 func TestCommandsCmdError(t *testing.T) {
 	out := testdata.ReadStdOut(func() {
-		listCommands(commandsOptions{
+		_, err := listCommands(commandsOptions{
 			platform: "fake",
 		})
+		assert.Error(t, err, "ERROR: platform fake not found")
 	})
 	assert.Contains(t, out, "ERROR: platform fake not found")
 }
