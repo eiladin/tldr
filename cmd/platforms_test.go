@@ -9,11 +9,12 @@ import (
 )
 
 func TestPlatformsCmd(t *testing.T) {
-	cases := []string{"common", "linux", "osx", "windows", "sunos"}
+	cases := []string{"common", "linux", "osx", "windows", "sunos", "android"}
 
 	out := testdata.ReadStdOut(func() {
 		cmd := newPlatformsCmd()
-		cmd.cmd.Execute()
+		err := cmd.cmd.Execute()
+		assert.NoError(t, err)
 	})
 	for _, c := range cases {
 		assert.Contains(t, out, c)

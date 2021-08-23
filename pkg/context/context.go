@@ -64,7 +64,7 @@ func New() *Context {
 		Cache: Cache{
 			Location: location,
 			TTL:      time.Hour * 24 * 7,
-			Remote:   "http://tldr-pages.github.com/assets/tldr.zip",
+			Remote:   "https://tldr.sh/assets/tldr.zip",
 		},
 		Operation: OperationRenderPage,
 	}

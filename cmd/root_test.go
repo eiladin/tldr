@@ -95,7 +95,8 @@ func TestDebugMode(t *testing.T) {
 	out := testdata.ReadStdOut(func() {
 		cmd := newRootCmd("version")
 		cmd.cmd.SetArgs([]string{"-d", "git", "fetch"})
-		cmd.cmd.Execute()
+		err := cmd.cmd.Execute()
+		assert.NoError(t, err)
 	})
 
 	assert.Contains(t, out, "debug logs enabled")

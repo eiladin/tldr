@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const remoteURL = "http://tldr-pages.github.com/assets/tldr.zip"
+const remoteURL = "https://tldr.sh/assets/tldr.zip"
 
 func downloadZip(location string) {
 	dir, _ := os.Create(location)

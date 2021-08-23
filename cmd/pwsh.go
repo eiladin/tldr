@@ -31,5 +31,5 @@ func newPwshCmd() *pwshCmd {
 }
 
 func genPwshCompletion(cmd *cobra.Command, w io.Writer) {
-	cmd.Root().GenPowerShellCompletion(w)
+	_ = cmd.Root().GenPowerShellCompletion(w)
 }
